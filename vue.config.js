@@ -1,5 +1,3 @@
 module.exports = {
-  baseUrl: process.env.NODE_ENV === 'production'
-    ? '/vue-page-test/'
-    : '/'
+  baseUrl: '/vue-page-test/'
 }
