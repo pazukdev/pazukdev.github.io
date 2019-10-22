@@ -96,7 +96,7 @@
                 this.setIncorrectCredentials(true);
                 let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
                 axios
-                    .post('login', credentialsUrl)
+                    .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
                     .then(response => {
                         if (response.status === 200) {
                             this.setIncorrectCredentials(false);
