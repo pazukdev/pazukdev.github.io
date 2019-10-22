@@ -112,7 +112,7 @@
 
             getItemView(itemId, removeLastItemView) {
                 axios
-                    .get("backend/item/get-view/" + itemId
+                    .get("https://bearings-info.herokuapp.com/item/get-view/" + itemId
                         + "/" + this.userName, {
                         headers: {
                             Authorization: this.authorization
@@ -137,7 +137,7 @@
 
             refreshWishList(userName) {
                 axios
-                    .get("backend/" + userName + "/categorized-wishlist", {
+                    .get("https://bearings-info.herokuapp.com/" + userName + "/categorized-wishlist", {
                         headers: {
                             Authorization: this.authorization
                         }

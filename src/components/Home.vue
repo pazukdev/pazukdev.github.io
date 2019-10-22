@@ -76,7 +76,7 @@
 
             getItemView(itemId, removeLastItemView) {
                 axios
-                    .get("/backend/item/get-view/" + itemId
+                    .get("https://bearings-info.herokuapp.com/item/get-view/" + itemId
                         + "/" + this.userName, {
                         headers: {
                             Authorization: this.authorization
