@@ -86,7 +86,8 @@
         methods: {
 
             isLoading() {
-                return this.loading === true || this.itemView === undefined;
+                // return this.loading === true || this.itemView === undefined;
+                return false;
             },
 
             isHome() {
