@@ -96,7 +96,7 @@
                 this.setIncorrectCredentials(true);
                 let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
                 axios
-                    .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
+                    .post('/backend/login', credentialsUrl)
                     .then(response => {
                         if (response.status === 200) {
                             this.setIncorrectCredentials(false);
@@ -115,7 +115,7 @@
                     repeatedPassword: this.repeatedPassword
                 };
                 axios
-                    .post("https://bearings-info.herokuapp.com/user/create", newUser)
+                    .post("/backend/user/create", newUser)
                     .then(response =>  this.loginIfValid(response.data));
             },
 

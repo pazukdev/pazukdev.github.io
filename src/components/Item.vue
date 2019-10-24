@@ -1,8 +1,9 @@
 <template>
     <div>
-<!--        {{file}}<br><br>-->
-<!--        {{imageData}}<br><br>-->
-
+<!--        <div style="text-align: left">-->
+<!--            {{newItemCategory}}<br>-->
+<!--            {{newItemName}}<br>-->
+<!--        </div>-->
         <table id="header-menu" class="no-border">
             <tbody>
             <tr>
@@ -93,7 +94,8 @@
                                 </datalist>
                             </td>
                             <td>
-                                <input @change="newItemNameMessage = ''" v-model="newItemName" type="text"/>
+                                <input @change="newItemNameMessage = ''"
+                                       v-model="newItemName" type="text"/>
                             </td>
                             <td>
                                 <button class="content"
@@ -235,7 +237,7 @@
                     {{itemView.partsTable.name}}
                 </td>
             </tr>
-            <tr v-if="isShowPartsTableHeader() && isPartsTitleVisible">
+            <tr v-if="isShowPartsTableHeader()">
                 <td>
                     <table id="parts-header" style="text-align: center">
                         <tbody>
@@ -256,7 +258,7 @@
                 <td v-if="table.parts.length > 0" colspan="3">
                     <table class="get-all-table">
                         <tbody>
-                        <tr v-if="arrayHaveActiveItems(table.parts) && !isMotorcycleCatalogueView()">
+                        <tr v-if="arrayHaveActiveItems(table.parts)">
                             <td style="width: 120px">
                                 <b>{{table.name}}</b>
                             </td>
@@ -286,8 +288,11 @@
                                 </button>
                             </td>
                             <td>
-                                <p v-if="!isEditMode && isShowQuantityValue()">
+                                <p v-if="isShowQuantityValue()">
                                     {{part.quantity}}
+                                </p>
+                                <p v-if="!isEditMode && isMotorcycleCatalogueView()">
+                                    {{part.comment}}
                                 </p>
                                 <input style="width: 80px"
                                        v-if="isEditMode && isOrdinaryItemView()"
@@ -351,18 +356,18 @@
                     </table>
                 </td>
             </tr>
-            <tr v-if="isReplacersTitleVisible()"><td><hr></td></tr>
+            <tr v-if="isReplacersTableVisible()"><td><hr></td></tr>
             </tbody>
         </table>
 
-        <table id="replacers-table" style="text-align: center">
+        <table v-if="isReplacersTableVisible()" id="replacers-table" style="text-align: center">
             <tbody>
-            <tr v-if="isReplacersTitleVisible()">
+            <tr>
                 <td colspan="6">
                     {{itemView.replacersTable.name}}
                 </td>
             </tr>
-            <tr v-if="isReplacersTitleVisible()">
+            <tr>
                 <td colspan="5" style="height: 20px"></td>
             </tr>
             <tr v-if="notStub(itemView.replacersTable.name) && statusActive(replacer)"
@@ -510,7 +515,6 @@
             ...mapState({
                 authorization: state => state.dictionary.authorization,
                 userName: state => state.dictionary.userName,
-                admin: state => state.dictionary.admin,
                 itemView: state => state.dictionary.itemViews[state.dictionary.itemViews.length - 1],
                 itemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
             })
@@ -522,7 +526,7 @@
                 let data = new FormData();
                 data.append("file", this.file);
                 axios
-                    .put("https://bearings-info.herokuapp.com/item/file-upload/" + this.itemView.itemId, data, {
+                    .put("/backend/item/file-upload/" + this.itemView.itemId, data, {
                         headers: {
                             Authorization: this.authorization
                         }
@@ -545,7 +549,8 @@
                 return !(this.itemView.partsTable.header[0] === "-"
                     && this.itemView.partsTable.header[1] === "-"
                     && this.itemView.partsTable.header[2] === "-")
-                    && this.itemView.category !== "Motorcycle";
+                    && this.itemView.category !== "Motorcycle"
+                    && this.isPartsTitleVisible();
             },
 
             addThisItemToWishList() {
@@ -714,12 +719,15 @@
                 this.clearItemCreationMessages();
                 if (this.newItemCategory === "") {
                     this.categoryMessage = "Category not specified";
-                } if (this.newItemName === "") {
+                } else if (this.newItemName === "") {
                     this.newItemNameMessage = "Item name not specified"
+                } else if (this.sameItemNameExistsInCategory(this.newItemCategory, this.newItemName)) {
+                    this.newItemNameMessage = "Item with this name already exists"
                 } else {
+                    //this.$store.dispatch("setLoading", true);
                     this.clearItemCreationMessages();
                     axios
-                        .post("https://bearings-info.herokuapp.com/item/create-view/"
+                        .post("/backend/item/create-view/"
                             + this.newItemCategory
                             + "/" + this.newItemName
                             + "/" + this.userName, {
@@ -735,6 +743,7 @@
             },
 
             setItem(id) {
+                this.$store.dispatch("setLoading", true);
                 this.$store.dispatch("addItemId", id);
                 this.$emit('select-item', id);
                 this.switchEditModeOff();
@@ -826,18 +835,20 @@
 
             update(id) {
                 axios
-                    .put("https://bearings-info.herokuapp.com/item/update-view/" + id + "/" + this.userName,
-                        this.newItemView, {
+                    .put("/backend/item/update-view/" + id + "/" + this.userName, this.newItemView, {
                         headers: {
                             Authorization: this.authorization
                         }
                     })
                     .then(() => {
-                        this.$store.dispatch("removeLastItemView");
-                        this.$store.dispatch("removeLastItemId");
-                        this.$store.dispatch("removeLastComponent");
+                        this.back();
                         this.setItem(id);
                     });
+            },
+
+            back() {
+                this.$store.dispatch("removeLastItemView");
+                this.$store.dispatch("removeLastItemId");
             },
 
             isPartsTitleVisible() {
@@ -846,10 +857,25 @@
                     || (this.notStub(this.itemView.partsTable.name) && this.isEditMode);
             },
 
-            isReplacersTitleVisible() {
+            isReplacersTableVisible() {
                 return (this.notStub(this.itemView.replacersTable.name)
                     && this.arrayHaveActiveItems(this.itemView.replacersTable.replacers))
                 || (this.notStub(this.itemView.replacersTable.name) && this.isEditMode);
+            },
+
+            sameItemNameExistsInCategory(category, name) {
+                for (let i = 0; i < this.itemView.partsTable.tables.length; i++) {
+                    let table = this.itemView.partsTable.tables[i];
+                    if (table.name === category) {
+                        for (let j = 0; j < table.parts.length; j++) {
+                            let item = table.parts[j];
+                            if (item.itemName === name) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
             },
 
             itemHaveActiveParts() {
@@ -901,7 +927,8 @@
             },
 
             isShowQuantityValue() {
-                return this.isOrdinaryItemView() || this.isUserListView();
+                return (!this.isEditMode && (this.isOrdinaryItemView() || this.isUserListView()))
+                    || (this.isEditMode && this.isUserListView());
             },
 
             notStub(name) {
@@ -921,7 +948,7 @@
             },
 
             isItemDeleteButtonVisibleToCurrentUser(item) {
-                return this.admin
+                return this.itemView.userData.comment === "Admin"
                     || this.currentUserIsCreator(item)
                     || this.isOrdinaryItemView()
                     || this.isWishListView();
