@@ -526,7 +526,7 @@
                 let data = new FormData();
                 data.append("file", this.file);
                 axios
-                    .put("/backend/item/file-upload/" + this.itemView.itemId, data, {
+                    .put("https://bearings-info.herokuapp.com/item/file-upload/" + this.itemView.itemId, data, {
                         headers: {
                             Authorization: this.authorization
                         }
@@ -727,7 +727,7 @@
                     //this.$store.dispatch("setLoading", true);
                     this.clearItemCreationMessages();
                     axios
-                        .post("/backend/item/create-view/"
+                        .post("https://bearings-info.herokuapp.com/item/create-view/"
                             + this.newItemCategory
                             + "/" + this.newItemName
                             + "/" + this.userName, {
@@ -835,7 +835,8 @@
 
             update(id) {
                 axios
-                    .put("/backend/item/update-view/" + id + "/" + this.userName, this.newItemView, {
+                    .put("https://bearings-info.herokuapp.com/item/update-view/" + id + "/"
+                        + this.userName, this.newItemView, {
                         headers: {
                             Authorization: this.authorization
                         }
