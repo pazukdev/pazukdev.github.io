@@ -34,6 +34,7 @@
                 {{"Item views stack length: " + itemViews.length}}<br>
                 {{"Item ids: " + itemIds}}<br>
                 {{"Is loading: " + loading}}<br>
+                {{"authorization: " + authorization}}<br>
                 {{"is admin: " + admin}}<br>
                 {{"itemView: " + itemView}}<br>
                 {{"itemId: " + itemId}}<br>
