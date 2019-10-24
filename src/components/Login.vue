@@ -101,13 +101,12 @@
                         if (response.status === 200) {
                             this.setIncorrectCredentials(false);
                             let authorization = response.headers.authorization;
-                            alert(JSON.stringify(response));
-                            alert(JSON.stringify(response.headers));
-                            alert(authorization);
+                            // alert(JSON.stringify(response));
+                            // alert(JSON.stringify(response.headers));
+                            // alert(authorization);
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", this.username);
                             this.$router.push({ path: '/'});
-                            alert("Passed!")
                         }
                     });
             },

@@ -173,11 +173,12 @@
             },
 
             isAdmin() {
-                let jwtData = this.authorization.split('.')[1];
-                let decodedJwtJsonData = window.atob(jwtData);
-                let decodedJwtData = JSON.parse(decodedJwtJsonData);
-                let isAdmin = decodedJwtData.roles[0] === "ROLE_ADMIN";
-                this.$store.dispatch("setAdmin", isAdmin);
+                // let jwtData = this.authorization.split('.')[1];
+                // let decodedJwtJsonData = window.atob(jwtData);
+                // let decodedJwtData = JSON.parse(decodedJwtJsonData);
+                // let isAdmin = decodedJwtData.roles[0] === "ROLE_ADMIN";
+                // this.$store.dispatch("setAdmin", isAdmin);
+                this.$store.dispatch("setAdmin", true);
             }
 
         }
