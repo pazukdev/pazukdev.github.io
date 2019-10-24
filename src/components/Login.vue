@@ -94,16 +94,23 @@
 
             login() {
                 this.setIncorrectCredentials(true);
-                let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
+                let credentialsUrl = "username=" + this.username + "&" + "password=" + this.password;
+                alert(credentialsUrl);
                 axios
                     .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
                     .then(response => {
+                        alert('https://bearings-info.herokuapp.com/login?' + credentialsUrl);
                         if (response.status === 200) {
+                            alert(200);
                             this.setIncorrectCredentials(false);
                             let authorization = response.headers.authorization;
+                            alert(response);
+                            alert(response.headers);
+                            alert(authorization);
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", this.username);
                             this.$router.push({ path: '/'});
+                            alert("Passed!")
                         }
                     });
             },
