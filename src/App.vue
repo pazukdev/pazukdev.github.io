@@ -1,49 +1,61 @@
 <template id="app">
-    <div id="background">
-        <div id="screen" style="text-align: center">
-            <div id="app_bar" style="background-color: #617D89; height: 70px; padding: 10px">
-                <table style="text-align: center; width: 100%; height: 100%">
-                    <tbody>
-                    <tr>
-                        <td style="width: 80px">
-                            <button
-                                    v-show="isBackButtonDisplayed()"
-                                    @click="back()"
-                                    id="back"
-                                    class="app-bar-button">
-                                    <b>Back</b>
-                            </button>
-                        </td>
-                        <td id="appName" style="text-align: center; font-size: x-large">
-                            <b>Bearings info</b>
-                        </td>
-                        <td style="width: 80px">
-                            <button
-                                    v-show="isAuthorized()"
-                                    @click="logout()"
-                                    id="logout"
-                                    class="app-bar-button">
-                                <b>Logout</b>
-                            </button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div style="width: 100%; text-align: left">
-                {{"Item views stack length: " + itemViews.length}}<br>
-                {{"Item ids: " + itemIds}}<br>
-                {{"Is loading: " + loading}}<br>
-                {{"authorization: " + authorization}}<br>
-                {{"is admin: " + admin}}<br>
-                {{"itemView: " + itemView}}<br>
-                {{"itemId: " + itemId}}<br>
-<!--                <div v-if="itemView !== null || itemView !== undefined">-->
-<!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
-<!--                </div>-->
-            </div>
-            <router-view style="padding: 20px"></router-view>
-        </div>
+    <div>
+        <table>
+            <tbody>
+            <tr class="background" ><td colspan="3"></td></tr>
+            <tr>
+                <td></td>
+                <td>
+                    <div id="screen" style="text-align: center">
+                        <div id="app_bar" style="background-color: #617D89; height: 70px; padding: 10px">
+                            <table style="text-align: center; width: 100%; height: 100%">
+                                <tbody>
+                                <tr>
+                                    <td style="width: 80px">
+                                        <button
+                                                v-show="isBackButtonDisplayed()"
+                                                @click="back()"
+                                                id="back"
+                                                class="app-bar-button">
+                                            <b>Back</b>
+                                        </button>
+                                    </td>
+                                    <td id="appName" style="text-align: center; font-size: x-large">
+                                        <b>Bearings info</b>
+                                    </td>
+                                    <td style="width: 80px">
+                                        <button
+                                                v-show="isAuthorized()"
+                                                @click="logout()"
+                                                id="logout"
+                                                class="app-bar-button">
+                                            <b>Logout</b>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="width: 100%; text-align: left">
+                            {{"Item views stack length: " + itemViews.length}}<br>
+                            {{"Item ids: " + itemIds}}<br>
+                            {{"Is loading: " + loading}}<br>
+                            {{"authorization: " + authorization}}<br>
+                            {{"is admin: " + admin}}<br>
+                            {{"itemView: " + itemView}}<br>
+                            {{"itemId: " + itemId}}<br>
+                            <!--                <div v-if="itemView !== null || itemView !== undefined">-->
+                            <!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
+                            <!--                </div>-->
+                        </div>
+                        <router-view style="padding: 20px"></router-view>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            <tr><td colspan="3"></td></tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
@@ -117,6 +129,21 @@
 </script>
 
 <style>
+    .background {
+        background: red;
+        height: 100px;
+    }
+
+    @media only screen and (max-width: 1000px) {
+        .background {
+            background: black;
+            height: 100px;
+        }
+        .mobile-hide {
+            /*visibility: hidden;*/
+        }
+    }
+
     #app {
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
