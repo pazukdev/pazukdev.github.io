@@ -97,7 +97,7 @@
                 this.getItemView(this.itemId);
             },
 
-            getItemView(itemId, removeLastItemView) {
+            getItemView(itemId) {
                 axios
                     .get("backend/item/get-view/" + itemId
                         + "/" + this.userName, {
@@ -107,6 +107,7 @@
                     })
                     .then(response => {
                         this.$store.dispatch("addItemView", response.data);
+                        console.log(JSON.stringify(response.data));
                     });
             }
         }

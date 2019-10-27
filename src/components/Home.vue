@@ -132,6 +132,7 @@
                             this.$store.dispatch("removeLastItemView");
                         }
                         this.$store.dispatch("addItemView", response.data);
+                        console.log(JSON.stringify(response.data));
                     });
             },
 
