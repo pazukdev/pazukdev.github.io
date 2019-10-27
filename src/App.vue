@@ -31,13 +31,13 @@
                 </table>
             </div>
             <div style="width: 100%; text-align: left">
-                {{"Item views stack length: " + itemViews.length}}<br>
-                {{"Item ids: " + itemIds}}<br>
+<!--                {{"Item views stack length: " + itemViews.length}}<br>-->
+<!--                {{"Item ids: " + itemIds}}<br>-->
 <!--                {{"Is loading: " + loading}}<br>-->
 <!--                {{"authorization: " + authorization}}<br>-->
 <!--                {{"is admin: " + admin}}<br>-->
-                {{"itemView: " + itemView}}<br>
-                {{"itemId: " + itemId}}<br>
+<!--                {{"itemView: " + itemView}}<br>-->
+<!--                {{"itemId: " + itemId}}<br>-->
                 <!--                <div v-if="itemView !== null || itemView !== undefined">-->
                 <!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
                 <!--                </div>-->
