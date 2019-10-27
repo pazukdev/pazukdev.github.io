@@ -1,5 +1,10 @@
 <template>
     <div id="app_area">
+        <div style="width: 100%; text-align: left">
+            {{"itemView.wishListIds: " + itemView.wishListIds}}<br>
+            {{"itemView.wishListIds.length: " + itemView.wishListIds.length}}<br>
+        </div>
+
         <div v-if="isLoading()" style="text-align: center; margin-top: 240px">
             {{"Loading..."}}
         </div>
