@@ -92,9 +92,9 @@
             },
 
             back() {
-                this.$store.dispatch("removeLastItemView");
-                this.$store.dispatch("removeLastItemId");
-                this.getItemView(this.itemId, true);
+                //this.$store.dispatch("removeLastItemView");
+                //this.$store.dispatch("removeLastItemId");
+                this.getItemView(this.itemId, false);
             },
 
             getItemView(itemId, removeLastItemView) {
