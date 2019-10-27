@@ -10,7 +10,7 @@
                     <button type="button"
                             v-if="!isWishListView()"
                             v-on:click="openWishList()">
-<!--                        {{"Wishlist: " + itemView.wishListIds.length + " items"}}-->
+                        {{"Wishlist: " + itemView.wishListIds.length + " items"}}
                     </button>
                 </td>
                 <td></td>

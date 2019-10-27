@@ -36,7 +36,7 @@
 <!--                {{"Is loading: " + loading}}<br>-->
 <!--                {{"authorization: " + authorization}}<br>-->
 <!--                {{"is admin: " + admin}}<br>-->
-<!--                {{"itemView: " + itemView}}<br>-->
+                {{"itemView: " + itemView}}<br>
                 {{"itemId: " + itemId}}<br>
                 <!--                <div v-if="itemView !== null || itemView !== undefined">-->
                 <!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
@@ -94,7 +94,7 @@
             back() {
                 this.$store.dispatch("removeLastItemView");
                 this.$store.dispatch("removeLastItemId");
-                this.getItemView(this.itemId, false);
+                this.getItemView(this.itemId);
             },
 
             getItemView(itemId, removeLastItemView) {
@@ -106,9 +106,6 @@
                         }
                     })
                     .then(response => {
-                        if (removeLastItemView === true ) {
-                            this.$store.dispatch("removeLastItemView");
-                        }
                         this.$store.dispatch("addItemView", response.data);
                     });
             }
