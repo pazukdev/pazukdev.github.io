@@ -92,8 +92,8 @@
             },
 
             back() {
-                //this.$store.dispatch("removeLastItemView");
-                //this.$store.dispatch("removeLastItemId");
+                this.$store.dispatch("removeLastItemView");
+                this.$store.dispatch("removeLastItemId");
                 this.getItemView(this.itemId, false);
             },
 
