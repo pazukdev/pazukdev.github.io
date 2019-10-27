@@ -46,9 +46,9 @@ const actions = {
         commit("removeLastItemView", context);
     },
 
-    removePreLastItemView: ({commit}, context) => {
-        commit("removePreLastItemView", context);
-    },
+    // removePreLastItemView: ({commit}, context) => {
+    //     commit("removePreLastItemView", context);
+    // },
 
     addItemId: ({commit}, context) => {
         commit("addItemId", context);
@@ -111,6 +111,7 @@ const mutations = {
     },
 
     addItemView(state, itemView) {
+        console.log(state.itemViews.length);
         state.itemViews.push(itemView);
         state.loading = false;
     },
@@ -123,13 +124,13 @@ const mutations = {
         }
     },
 
-    removePreLastItemView(state) {
-        console.log(state.itemViews.length);
-        state.loading = true;
-        if (state.itemIds.length > 1) {
-            state.itemViews.splice(state.itemViews.length - 2, 1);
-        }
-    },
+    // removePreLastItemView(state) {
+    //     console.log(state.itemViews.length);
+    //     state.loading = true;
+    //     if (state.itemIds.length > 1) {
+    //         state.itemViews.splice(state.itemViews.length - 2, 1);
+    //     }
+    // },
 
     addItemId(state, itemId) {
         console.log(state.itemIds.length);
