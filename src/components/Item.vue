@@ -1,8 +1,8 @@
 <template>
     <div>
-        <div style="text-align: left">
-            {{itemView.wishListIds.length}}<br>
-        </div>
+<!--        <div style="text-align: left">-->
+<!--            {{itemView.wishListIds.length}}<br>-->
+<!--        </div>-->
         <table id="header-menu" class="no-border">
             <tbody>
             <tr>
@@ -10,7 +10,7 @@
                     <button type="button"
                             v-if="!isWishListView()"
                             v-on:click="openWishList()">
-                        {{"Wishlist: " + itemView.wishListIds.length + " items"}}
+<!--                        {{"Wishlist: " + itemView.wishListIds.length + " items"}}-->
                     </button>
                 </td>
                 <td></td>

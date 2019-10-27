@@ -31,6 +31,8 @@
                 </table>
             </div>
             <div style="width: 100%; text-align: left">
+                {{"itemView.wishListIds: " + itemView.wishListIds}}<br>
+                {{"itemView.wishListIds.length: " + itemView.wishListIds.length}}<br>
                 {{"Item views stack length: " + itemViews.length}}<br>
                 {{"Item ids: " + itemIds}}<br>
 <!--                {{"Is loading: " + loading}}<br>-->
