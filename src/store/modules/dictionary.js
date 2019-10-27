@@ -116,16 +116,23 @@ const mutations = {
     },
 
     removeLastItemView(state) {
+        console.log(state.itemViews.length);
         state.loading = true;
-        state.itemViews.splice(state.itemViews.length - 1, 1);
+        if (state.itemIds.length > 0) {
+            state.itemViews.splice(state.itemViews.length - 1, 1);
+        }
     },
 
     removePreLastItemView(state) {
+        console.log(state.itemViews.length);
         state.loading = true;
-        state.itemViews.splice(state.itemViews.length - 2, 1);
+        if (state.itemIds.length > 1) {
+            state.itemViews.splice(state.itemViews.length - 2, 1);
+        }
     },
 
     addItemId(state, itemId) {
+        console.log(state.itemIds.length);
         if (state.itemIds[state.itemIds.length - 1] !== itemId) {
             state.itemIds.push(itemId);
         }
@@ -133,6 +140,7 @@ const mutations = {
     },
 
     removeLastItemId(state) {
+        console.log(state.itemIds.length);
         state.itemIds.splice(state.itemIds.length - 1, 1);
     }
 

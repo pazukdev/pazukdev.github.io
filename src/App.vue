@@ -33,10 +33,10 @@
             <div style="width: 100%; text-align: left">
                 {{"Item views stack length: " + itemViews.length}}<br>
                 {{"Item ids: " + itemIds}}<br>
-                {{"Is loading: " + loading}}<br>
-                {{"authorization: " + authorization}}<br>
-                {{"is admin: " + admin}}<br>
-                {{"itemView: " + itemView}}<br>
+<!--                {{"Is loading: " + loading}}<br>-->
+<!--                {{"authorization: " + authorization}}<br>-->
+<!--                {{"is admin: " + admin}}<br>-->
+<!--                {{"itemView: " + itemView}}<br>-->
                 {{"itemId: " + itemId}}<br>
                 <!--                <div v-if="itemView !== null || itemView !== undefined">-->
                 <!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
@@ -88,12 +88,13 @@
             },
 
             isBackButtonDisplayed() {
-                return this.itemIds.length > 1 && !this.loading;
+                return true;
+                //return this.itemIds.length > 1 && !this.loading;
             },
 
             back() {
-                // this.$store.dispatch("removeLastItemView");
-                // this.$store.dispatch("removeLastItemId");
+                this.$store.dispatch("removeLastItemView");
+                this.$store.dispatch("removeLastItemId");
                 this.getItemView(this.itemId, false);
             },
 
