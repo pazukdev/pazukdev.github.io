@@ -99,7 +99,7 @@
 
             getItemView(itemId) {
                 axios
-                    .get("backend/item/get-view/" + itemId
+                    .get("https://bearings-info.herokuapp.com/item/get-view/" + itemId
                         + "/" + this.userName, {
                         headers: {
                             Authorization: this.authorization
@@ -107,7 +107,6 @@
                     })
                     .then(response => {
                         this.$store.dispatch("addItemView", response.data);
-                        console.log(JSON.stringify(response.data));
                     });
             }
         }
