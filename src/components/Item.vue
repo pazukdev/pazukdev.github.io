@@ -1,9 +1,8 @@
 <template>
     <div>
-<!--        <div style="text-align: left">-->
-<!--            {{newItemCategory}}<br>-->
-<!--            {{newItemName}}<br>-->
-<!--        </div>-->
+        <div style="text-align: left">
+            {{itemView.wishListIds.length}}<br>
+        </div>
         <table id="header-menu" class="no-border">
             <tbody>
             <tr>
