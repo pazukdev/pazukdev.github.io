@@ -1,10 +1,5 @@
 <template>
-    <div id="app_area">
-<!--        <div style="width: 100%; text-align: left">-->
-<!--            {{"itemView.wishListIds: " + itemView.wishListIds}}<br>-->
-<!--            {{"itemView.wishListIds.length: " + itemView.wishListIds.length}}<br>-->
-<!--        </div>-->
-
+    <div>
         <div v-if="isLoading()" style="text-align: center; margin-top: 240px">
             {{"Loading..."}}
         </div>
@@ -15,9 +10,7 @@
             <tbody>
             <tr>
                 <td>
-                    <button class="content"
-                            type="button"
-                            style="width: 174px"
+                    <button type="button"
                             v-on:click="openItemsManagement()">
                         {{"Items management"}}
                     </button>
@@ -25,9 +18,7 @@
             </tr>
             <tr v-if="admin">
                 <td>
-                    <button class="content"
-                            type="button"
-                            style="width: 174px"
+                    <button type="button"
                             v-on:click="openUsersList()">
                         {{"Users"}}
                     </button>
@@ -78,9 +69,8 @@
                 wishList: state => state.dictionary.wishList,
                 table: state => state.dictionary.table,
                 itemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1],
-                itemViews: state => state.dictionary.itemViews,
-                itemIds: state => state.dictionary.itemIds,
-                itemView: state => state.dictionary.itemViews[state.dictionary.itemViews.length - 1]
+                itemView: state => state.dictionary.itemView,
+                itemIds: state => state.dictionary.itemIds
             })
         },
 
@@ -131,7 +121,7 @@
                         if (removeLastItemView === true) {
                             this.$store.dispatch("removeLastItemView");
                         }
-                        this.$store.dispatch("addItemView", response.data);
+                        this.$store.dispatch("setItemView", response.data);
                     });
             },
 

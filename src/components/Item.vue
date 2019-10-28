@@ -1,8 +1,9 @@
 <template>
     <div>
-<!--        <div style="text-align: left">-->
-<!--            {{itemView.wishListIds.length}}<br>-->
-<!--        </div>-->
+        <!--        <div style="text-align: left">-->
+        <!--            {{newItemCategory}}<br>-->
+        <!--            {{newItemName}}<br>-->
+        <!--        </div>-->
         <table id="header-menu" class="no-border">
             <tbody>
             <tr>
@@ -38,7 +39,7 @@
                     <button v-if="itemView.searchEnabled"
                             style="width: 100%"
                             type="button"
-                            @click="stubMethod()">
+                            @click="searchInGoogle()">
                         {{"Google search"}}
                     </button>
                 </td>
@@ -201,7 +202,7 @@
         <table id="item-image"
                class="no-border"
                style="text-align: center"
-        v-if="isViewWithImage()">
+               v-if="isViewWithImage()">
             <tbody>
             <tr v-if="imageData.length === 0">
                 <td>
@@ -229,7 +230,7 @@
         </table>
 
         <table id="parts-table"
-        style="text-align: center">
+               style="text-align: center">
             <tbody>
             <tr v-if="isPartsTitleVisible()">
                 <td>
@@ -276,7 +277,7 @@
                             </td>
                             <td>
                                 <p style="width: 146px"
-                                     v-if="isUserListView()">
+                                   v-if="isUserListView()">
                                     {{part.buttonText}}
                                 </p>
                                 <button type="button"
@@ -514,12 +515,17 @@
             ...mapState({
                 authorization: state => state.dictionary.authorization,
                 userName: state => state.dictionary.userName,
-                itemView: state => state.dictionary.itemViews[state.dictionary.itemViews.length - 1],
+                itemView: state => state.dictionary.itemView,
                 itemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
             })
         },
 
         methods: {
+
+            searchInGoogle() {
+                let q = "buy " + this.itemView.header.name;
+                window.open('http://google.com/search?q=' + q);
+            },
 
             onUpload() {
                 let data = new FormData();
@@ -834,8 +840,7 @@
 
             update(id) {
                 axios
-                    .put("https://bearings-info.herokuapp.com/item/update-view/" + id + "/"
-                        + this.userName, this.newItemView, {
+                    .put("https://bearings-info.herokuapp.com/item/update-view/" + id + "/" + this.userName, this.newItemView, {
                         headers: {
                             Authorization: this.authorization
                         }
@@ -965,3 +970,21 @@
         }
     }
 </script>
+
+<style>
+    #parts-table {
+
+    }
+
+    .parts-left-column {
+        width: 120px;
+    }
+
+    .parts-middle-column {
+        width: 146px;
+    }
+
+    .parts-right-column {
+        width: 80px;
+    }
+</style>

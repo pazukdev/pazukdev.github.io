@@ -3,11 +3,11 @@
         <table class="creation-form">
             <tbody>
             <tr>
-                <td style="text-align: right">
+                <td id="login-or-signup-txt">
                     Please, {{buttonName().toLowerCase()}} or
                 </td>
                 <td>
-                    <button style="width: 50%" v-on:click="switchForm">{{buttonReverseName()}}</button>
+                    <button v-on:click="switchForm()">{{buttonReverseName()}}</button>
                 </td>
             </tr>
             <tr>
@@ -37,7 +37,7 @@
             <tr>
                 <td></td>
                 <td>
-                    <button style="width: 100%;" v-on:click="performLoginPageAction">{{buttonName()}}</button>
+                    <button v-on:click="performLoginPageAction">{{buttonName()}}</button>
                 </td>
             </tr>
             <tr v-if="incorrectCredentials" class="warning-message">
@@ -45,7 +45,7 @@
                     Incorrect login or password !
                 </td>
             </tr>
-            <tr v-for="message in validationMessages" class="warning-message">
+            <tr v-for="message in validationMessages" v-bind:value="message" class="warning-message">
                 <td colspan="2">
                     {{message}}
                 </td>
@@ -94,7 +94,7 @@
 
             login() {
                 this.setIncorrectCredentials(true);
-                let credentialsUrl = "username=" + this.username + "&" + "password=" + this.password;
+                let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
                 axios
                     .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
                     .then(response => {
@@ -146,7 +146,7 @@
             },
 
             setIncorrectCredentials(incorrectCredentials) {
-                this.$store.dispatch("setIncorrectCredentials", incorrectCredentials = true);
+                this.$store.dispatch("setIncorrectCredentials", incorrectCredentials);
             }
         }
     }
@@ -157,12 +157,16 @@
         margin-top: 120px;
     }
 
-    input {
-        width: 100%;
+    button {
+        width: 50%;
     }
 
     .warning-message {
         text-align: center;
         color: red;
+    }
+
+    #login-or-signup-txt {
+        text-align: right;
     }
 </style>
