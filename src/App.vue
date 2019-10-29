@@ -1,61 +1,49 @@
 <template id="app">
-<!--    <div></div>-->
-    <div style="background: black">
-        <table style="width: 100%" class="no-border">
-            <tbody>
-            <tr class="mobile-hide" style="height: 50px"><td colspan="3"></td></tr>
-            <tr style="text-align: center">
-                <td class="mobile-hide"></td>
-                <td>
-                    <div id="screen" class="screen-with-radius">
-                        <div id="app_bar" style="background-color: #617D89; height: 70px; padding: 10px">
-                            <table style="text-align: center; width: 100%; height: 100%">
-                                <tbody>
-                                <tr>
-                                    <td style="width: 80px">
-                                        <button
-                                                v-show="isBackButtonDisplayed()"
-                                                @click="back()"
-                                                id="back"
-                                                class="app-bar-button">
-                                            <b>Back</b>
-                                        </button>
-                                    </td>
-                                    <td id="appName" style="text-align: center; font-size: x-large">
-                                        <b>Bearings info</b>
-                                    </td>
-                                    <td style="width: 80px">
-                                        <button
-                                                v-show="isAuthorized()"
-                                                @click="logout()"
-                                                id="logout"
-                                                class="app-bar-button">
-                                            <b>Logout</b>
-                                        </button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div style="width: 100%; text-align: left">
-                            <!--                {{"Item views stack length: " + itemViews.length}}<br>-->
-                            <!--                {{"Item ids: " + itemIds}}<br>-->
-                            <!--                {{"Is loading: " + loading}}<br>-->
-                            <!--                {{"is admin: " + admin}}<br>-->
-                            <!--                {{"itemView: " + itemView}}<br>-->
-                            <!--                {{"itemId: " + itemId}}<br>-->
-                            <!--                <div v-if="itemView !== null || itemView !== undefined">-->
-                            <!--                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
-                            <!--                </div>-->
-                        </div>
-                        <router-view style="padding: 20px"></router-view>
-                    </div>
-                </td>
-                <td class="mobile-hide"></td>
-            </tr>
-            <tr class="mobile-hide" style="height: 100%"><td colspan="3"></td></tr>
-            </tbody>
-        </table>
+    <div id="main-div">
+        <div class="mobile-hide" style="height: 1%"></div>
+        <div id="screen">
+            <div id="app_bar" style="background-color: #617D89; height: 70px; padding: 10px">
+                <table style="text-align: center; width: 100%; height: 100%">
+                    <tbody>
+                    <tr>
+                        <td style="width: 80px">
+                            <button
+                                    v-show="isBackButtonDisplayed()"
+                                    @click="back()"
+                                    id="back"
+                                    class="app-bar-button">
+                                <b>Back</b>
+                            </button>
+                        </td>
+                        <td id="appName" style="text-align: center; font-size: x-large">
+                            <b>Bearings info</b>
+                        </td>
+                        <td style="width: 80px">
+                            <button
+                                    v-show="isAuthorized()"
+                                    @click="logout()"
+                                    id="logout"
+                                    class="app-bar-button">
+                                <b>Logout</b>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+<!--            <div style="width: 100%; text-align: left">-->
+<!--                                {{"Item views stack length: " + itemViews.length}}<br>-->
+<!--                                {{"Item ids: " + itemIds}}<br>-->
+<!--                                {{"Is loading: " + loading}}<br>-->
+<!--                                {{"is admin: " + admin}}<br>-->
+<!--                                {{"itemView: " + itemView}}<br>-->
+<!--                                {{"itemId: " + itemId}}<br>-->
+<!--                                <div v-if="itemView !== null || itemView !== undefined">-->
+<!--                                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
+<!--                                </div>-->
+<!--            </div>-->
+            <router-view style="padding: 20px"></router-view>
+        </div>
     </div>
 </template>
 
@@ -111,7 +99,7 @@
 
             getItemView(itemId) {
                 axios
-                    .get("https://bearings-info.herokuapp.com/item/get-view/" + itemId
+                    .get("backend/item/get-view/" + itemId
                         + "/" + this.userName, {
                         headers: {
                             Authorization: this.authorization
@@ -130,6 +118,12 @@
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        height: 100%;
+    }
+
+    #main-div {
+        background: black;
+        height: 2000px;
     }
 
     #screen {
@@ -139,21 +133,30 @@
         width: 480px;
         height: 800px;
         overflow-y: auto;
+        border-radius: 10px;
     }
 
-    .mobile-hide {
-        background: orange;
-    }
+    @media only screen and (max-width: 1280px) {
+        #main-div {
+            background: #212121;
+        }
 
-    @media only screen and (max-width: 1000px) {
         .mobile-hide {
             display: none;
         }
-    }
 
-    @media only screen and (min-width: 1000px) {
-        .screen-with-radius {
-            border-radius: 10px;
+        #screen {
+            width: 100%;
+            height: 1024px;
+            border-radius: 0;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
         }
     }
 
@@ -192,7 +195,7 @@
         width: 100%;
     }
 
-    .right {
+    .half-width {
         width: 50%;
     }
 
@@ -217,6 +220,10 @@
 
     .no-border {
         border-spacing: 0;
+    }
+
+    .third-part-wide {
+        width: 33.33%;
     }
 
     button {
