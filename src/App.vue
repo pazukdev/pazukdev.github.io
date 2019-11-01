@@ -1,9 +1,8 @@
 <template id="app">
     <div id="main-div">
-        <div class="mobile-hide" style="height: 1%"></div>
         <div id="screen">
-            <div id="app_bar" style="background-color: #617D89; height: 70px; padding: 10px">
-                <table style="text-align: center; width: 100%; height: 100%">
+            <div id="app_bar">
+                <table>
                     <tbody>
                     <tr>
                         <td style="width: 80px">
@@ -31,17 +30,15 @@
                     </tbody>
                 </table>
             </div>
-<!--            <div style="width: 100%; text-align: left">-->
-<!--                                {{"Item views stack length: " + itemViews.length}}<br>-->
-<!--                                {{"Item ids: " + itemIds}}<br>-->
-<!--                                {{"Is loading: " + loading}}<br>-->
-<!--                                {{"is admin: " + admin}}<br>-->
-<!--                                {{"itemView: " + itemView}}<br>-->
-<!--                                {{"itemId: " + itemId}}<br>-->
-<!--                                <div v-if="itemView !== null || itemView !== undefined">-->
-<!--                                    {{"itemView.itemId: " + itemView.itemId}}<br>-->
-<!--                                </div>-->
-<!--            </div>-->
+            <div style="text-align: left">
+<!--                {{authorization}}<br>-->
+<!--                {{"Item ids: " + itemIds}}<br>-->
+<!--                {{"Is loading: " + loadingState}}<br>-->
+<!--                {{"is admin: " + admin}}<br>-->
+<!--                {{"itemView: " + itemView}}<br>-->
+<!--                {{"itemId: " + lastItemId}}<br>-->
+
+            </div>
             <router-view style="padding: 20px"></router-view>
         </div>
     </div>
@@ -57,25 +54,21 @@
         computed: {
             ...mapState({
                 authorization: state => state.dictionary.authorization,
-                loading: state => state.dictionary.loading,
+                loadingState: state => state.dictionary.loadingState,
                 itemIds: state => state.dictionary.itemIds,
                 itemView: state => state.dictionary.itemView,
                 incorrectCredentials: state => state.dictionary.incorrectCredentials,
                 userName: state => state.dictionary.userName,
-                itemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1],
+                lastItemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1],
                 admin: state => state.dictionary.admin
             })
         },
 
         methods: {
             logout() {
-                this.removeToken();
-                this.reload();
-            },
-
-            removeToken() {
-                let token = null;
-                this.$store.dispatch("setAuthorization", token);
+                window.localStorage.clear();
+                this.$store.dispatch("setDefaultState");
+                this.$router.push('/login');
             },
 
             isAuthorized() {
@@ -87,17 +80,17 @@
             },
 
             isBackButtonDisplayed() {
-                return this.itemIds.length > 1 && !this.loading;
+                return this.itemIds.length > 1 && !this.loadingState;
             },
 
             back() {
-                this.$store.dispatch("setLoading", true);
-                this.$store.dispatch("removeLastItemView");
+                this.$store.dispatch("setLoadingState", true);
                 this.$store.dispatch("removeLastItemId");
-                this.getItemView(this.itemId);
+                this.getItemView(this.lastItemId);
             },
 
             getItemView(itemId) {
+                console.log("000000000");
                 axios
                     .get("backend/item/get-view/" + itemId
                         + "/" + this.userName, {
@@ -106,7 +99,13 @@
                         }
                     })
                     .then(response => {
+                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         this.$store.dispatch("setItemView", response.data);
+                        this.$store.dispatch("setLoadingState", false);
+                    })
+                    .catch(error => {
+                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        this.$store.dispatch("setLoadingState", false);
                     });
             }
         }
@@ -118,50 +117,44 @@
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        height: 100%;
     }
 
     #main-div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
         background: black;
-        height: 2000px;
     }
 
     #screen {
+        overflow: auto;
         background-color: #212121;
         color: #808080;
-        margin: auto;
         width: 480px;
         height: 800px;
-        overflow-y: auto;
         border-radius: 10px;
+
     }
 
     @media only screen and (max-width: 1280px) {
-        #main-div {
-            background: #212121;
-        }
-
-        .mobile-hide {
-            display: none;
-        }
-
         #screen {
+            border-radius: initial;
             width: 100%;
-            height: 1024px;
-            border-radius: 0;
-        }
-
-        input {
-            width: 100%;
-        }
-
-        button {
-            width: 100%;
+            height: 100%;
         }
     }
 
     #screen::-webkit-scrollbar {
         display: none;
+    }
+
+    #app_bar {
+        padding-top: 5px;
+        min-height: 56px;
+        max-height: 200px;
+        text-align: center;
     }
 
     #appName {
@@ -177,41 +170,7 @@
         color: #212121
     }
 
-    .centred-table {
-        text-align: center;
-    }
-
-    .get-all-table {
-        text-align: center;
-    }
-
-    .creation-form {
-        text-align: left;
-        border-spacing: 20px;
-        border-collapse: separate;
-    }
-
-    .content {
-        width: 100%;
-    }
-
-    .half-width {
-        width: 50%;
-    }
-
-    .default-width-1 {
-        width: 160px;
-    }
-
-    .default-width-2 {
-        width: 100px;
-    }
-
-    .full-width {
-        width: 100%;
-    }
-
-    .round-button {
+    .round-button, .round-delete-button {
         text-align: center;
         height: 32px;
         width: 32px;
@@ -226,34 +185,33 @@
         width: 33.33%;
     }
 
-    button {
-        border-radius: 4px;
-        border: none;
-        background: #808080;
-        height: 52px;
-        width: 146px;
-    }
-
-    select {
-        border-radius: 4px;
-        text-indent: 10px;
-        height: 36px;
-        background: #808080;
-    }
-
-    input {
-        border-radius: 4px;
-        border: none;
-        background: #617D89;
-        height: 36px;
+    table, button, select, input, .round-button {
         text-align: center;
     }
 
-    table {
+    table, button, select, input {
         width: 100%;
-        text-align: left;
-        margin-left:auto;
-        margin-right:auto;
+    }
+
+    table {
+        height: 100%;
+    }
+
+    hr, button, select, input {
+        background: #808080;
+    }
+
+    input, #app_bar {
+        background: #617D89;
+    }
+
+    button, select, input {
+        border-radius: 4px;
+        border: none;
+        height: 52px;
+    }
+
+    table {
         border-spacing: 6px;
         border-collapse: separate;
     }
@@ -262,8 +220,11 @@
         font-weight: normal;
     }
 
-    hr {
-        background: #808080;
+    img {
+        max-width: 100%;
     }
 
+    .alert-message {
+        color: red;
+    }
 </style>

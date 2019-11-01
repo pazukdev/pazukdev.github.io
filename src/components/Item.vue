@@ -4,12 +4,11 @@
         <!--            {{newItemCategory}}<br>-->
         <!--            {{newItemName}}<br>-->
         <!--        </div>-->
-        <table id="header-menu" class="no-border">
+        <table id="header-menu">
             <tbody>
             <tr>
                 <td class="third-part-wide">
                     <button type="button"
-                            class="full-width"
                             v-if="!isWishListView()"
                             v-on:click="openWishList()">
                         {{"Wishlist: " + itemView.wishListIds.length + " items"}}
@@ -19,7 +18,7 @@
                 <td class="third-part-wide" style="text-align: right">
                     <div>{{itemView.userData.itemName}}</div>
                     <div>{{"Rating: " + itemView.userData.rating}}</div>
-                    <div v-if="itemView.userData.comment === 'Admin'">{{"You are admin"}}</div>
+                    <div v-if="isAdmin()">{{"You are admin"}}</div>
                 </td>
             </tr>
             <tr><td colspan="3"><hr></td></tr>
@@ -27,7 +26,6 @@
                 <td>
                     <button v-if="!isInWishList(itemView.itemId) && isOrdinaryItemView() && !isEditMode"
                             type="button"
-                            class="full-width"
                             @click="addThisItemToWishList()">
                         {{"Add to Wish List"}}
                     </button>
@@ -38,7 +36,6 @@
                 <td></td>
                 <td>
                     <button v-if="itemView.searchEnabled"
-                            class="full-width"
                             type="button"
                             @click="searchInGoogle()">
                         {{"Google search"}}
@@ -51,40 +48,47 @@
             </tbody>
         </table>
 
-        <table id="item-creation-menu" class="no-border">
+        <table id="item-creation-menu">
             <tbody>
-            <tr style="text-align: center">
+            <tr>
                 <td colspan="3">
                     <b>{{itemView.header.name}}</b>
                 </td>
             </tr>
-            <tr v-if="isOrdinaryItemView()" style="text-align: center">
+            <tr v-if="isOrdinaryItemView()">
                 <td colspan="3">
                     {{"Created by " + itemView.creatorName}}
                 </td>
             </tr>
             <tr style="height: 10px"><td></td></tr>
-            <tr>
+            <tr v-if="isItemsManagementView()">
                 <td colspan="3">
-                    <table style="text-align: center" v-if="isItemsManagementView()">
+                    <table>
                         <tbody>
                         <tr>
-                            <td colspan="3"><hr></td>
+                            <td colspan="2"><hr></td>
                         </tr>
                         <tr>
-                            <td colspan="3">{{"Create new item"}}</td>
+                            <td colspan="2">{{"Create new item"}}</td>
                         </tr>
                         <tr style="color: red">
-                            <td colspan="3">{{categoryMessage}}</td>
+                            <td colspan="2">{{categoryMessage}}</td>
                         </tr>
                         <tr style="color: red">
-                            <td colspan="3">{{newItemNameMessage}}</td>
+                            <td colspan="2">{{newItemNameMessage}}</td>
+                        </tr>
+                        <tr>
+                            <td class="two-columns-table-left-column">
+                                {{"Category"}}
+                            </td>
+                            <td class="two-column-table-right-column">
+                                {{"Name"}}
+                            </td>
                         </tr>
                         <tr>
                             <td>
                                 <input type="text"
                                        list="categories"
-                                       class="full-width"
                                        @change="categorySelectOnChange()"
                                        v-model="newItemCategory"/>
                                 <datalist id="categories">
@@ -96,18 +100,20 @@
                             </td>
                             <td>
                                 <input @change="newItemNameMessage = ''"
-                                       v-model="newItemName" type="text"/>
+                                       v-model="newItemName"
+                                       type="text"/>
                             </td>
-                            <td>
-                                <button class="full-width"
-                                        type="button"
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="button"
                                         v-on:click="create()">
                                     {{"Create"}}
                                 </button>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="3"><hr></td>
+                            <td colspan="2"><hr></td>
                         </tr>
                         </tbody>
                     </table>
@@ -120,19 +126,19 @@
             <tbody>
             <tr style="text-align: left"
                 v-for="row in itemView.header.matrix">
-                <td class="half-width">
+                <td class="two-columns-table-left-column">
                     <p>
                         {{row[0]}}
                     </p>
                 </td>
-                <td>
+                <td class="two-column-table-right-column">
                     <input v-if="isEditMode && isOrdinaryItemView()" v-model="row[1]" type="text"/>
                     <p v-if="!isShowInfoButton(row[3])
                     && (!isEditMode || (isEditMode && !isOrdinaryItemView()))">
                         {{row[1]}}
                     </p>
-                    <button v-if="isShowInfoButton(row[3])" type="button"
-                            class="full-width"
+                    <button v-if="isShowInfoButton(row[3])"
+                            type="button"
                             @click="setItem(row[2])">
                         {{row[1]}}
                     </button>
@@ -141,19 +147,18 @@
                     <button v-if="isEditMode && isOrdinaryItemView() && row[0] !== 'Name'"
                             v-model="newItemView"
                             type="button"
-                            class="round-button"
-                            style="background: red"
+                            class="round-delete-button"
                             @click="removeRowFromHeader(row)">
                         {{"-"}}
                     </button>
                 </td>
             </tr>
-            <tr style="text-align: center; color: red">
-                <td colspan="3">
+            <tr>
+                <td colspan="3" class="alert-message">
                     {{newHeaderRowMessage}}
                 </td>
             </tr>
-            <tr style="text-align: left" v-if="isEditMode && isOrdinaryItemView()">
+            <tr v-if="isEditMode && isOrdinaryItemView()">
                 <td>
                     <input v-model="newHeaderRow.parameter" type="text"/>
                 </td>
@@ -169,11 +174,10 @@
                 </td>
             </tr>
             <tr style="height: 10px"><td></td></tr>
-            <tr style="text-align: left">
+            <tr>
                 <td>
                     <button v-if="isEditMode"
                             type="button"
-                            class="super-wide"
                             @click="cancel()">
                         {{"Cancel"}}
                     </button>
@@ -181,13 +185,11 @@
                 <td v-if="!isMotorcycleCatalogueView()" style="text-align: right">
                     <button v-if="!isEditMode"
                             type="button"
-                            class="super-wide"
                             @click="edit()">
                         {{"Edit"}}
                     </button>
                     <button v-if="isEditMode"
                             type="button"
-                            class="super-wide"
                             @click="save()">
                         {{"Save"}}
                     </button>
@@ -201,21 +203,18 @@
         </table>
 
         <table id="item-image"
-               class="no-border"
-               style="text-align: center"
                v-if="isViewWithImage()">
             <tbody>
             <tr v-if="imageData.length === 0">
                 <td>
-                    <img style="max-width: 100%"
-                         :src="require(`../assets//${itemView.image}`)"
+                    <img :src="require(`../assets//${itemView.image}`)"
                          :alt="itemView.header.name">
                 </td>
             </tr>
             <tr v-if="imageData.length > 0">
                 <td>
                     <div class="image-preview">
-                        <img class="preview" style="max-width: 100%" :src="imageData">
+                        <img class="preview" :src="imageData">
                     </div>
                 </td>
             </tr>
@@ -230,8 +229,7 @@
             </tbody>
         </table>
 
-        <table id="parts-table"
-               style="text-align: center">
+        <table id="parts-table">
             <tbody>
             <tr v-if="isPartsTitleVisible()">
                 <td>
@@ -240,16 +238,19 @@
             </tr>
             <tr v-if="isShowPartsTableHeader()">
                 <td>
-                    <table id="parts-header" style="text-align: center">
+                    <table id="parts-header">
                         <tbody>
                         <tr>
-                            <td class="parts-left-column">{{itemView.partsTable.header[0]}}</td>
-                            <td>{{itemView.partsTable.header[1]}}</td>
-                            <td class="parts-left-column" style="text-align: right"
-                                v-if="itemView.partsTable.header[2] !== '-'">
+                            <td class="three-column-table-left-column">
+                                {{itemView.partsTable.header[0]}}
+                            </td>
+                            <td class="three-column-table-middle-column">
+                                {{itemView.partsTable.header[1]}}
+                            </td>
+                            <td class="three-column-table-right-column" v-if="itemView.partsTable.header[2] !== '-'">
                                 {{itemView.partsTable.header[2]}}
                             </td>
-                            <td></td>
+                            <td class="three-column-table-button-column"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -257,49 +258,46 @@
             </tr>
             <tr v-for="table in itemView.partsTable.tables">
                 <td v-if="table.parts.length > 0" colspan="3">
-                    <table class="get-all-table">
+                    <table id="get-all-table">
                         <tbody>
                         <tr v-if="arrayHaveActiveItems(table.parts)">
-                            <td class="parts-left-column">
+                            <td class="three-column-table-left-column">
                                 <b>{{table.name}}</b>
                             </td>
-                            <td></td>
-                            <td class="parts-right-column"></td>
-                            <td></td>
+                            <td class="three-column-table-middle-column"></td>
+                            <td class="three-column-table-right-column"></td>
+                            <td class="three-column-table-button-column"></td>
                         </tr>
                         <tr v-for="part in table.parts" v-if="statusActive(part)">
-                            <td class="parts-left-column">
-                                <p v-if="!isEditMode || (isEditMode && !isOrdinaryItemView())">
+                            <td class="three-column-table-left-column">
+                                <p class="three-column-table-left-column-text"
+                                   v-if="!isEditMode || (isEditMode && !isOrdinaryItemView())">
                                     {{getFirstColumnValue(part)}}
                                 </p>
-                                <input class="parts-left-column"
-                                       v-if="isEditMode && isOrdinaryItemView()"
+                                <input v-if="isEditMode && isOrdinaryItemView()"
                                        v-model="part.location" type="text"/>
                             </td>
-                            <td>
-                                <p class="parts-middle-column"
-                                   v-if="isUserListView()">
+                            <td class="three-column-table-middle-column">
+                                <p v-if="isUserListView()">
                                     {{part.buttonText}}
                                 </p>
                                 <button type="button"
-                                        class="parts-middle-column"
                                         v-if="!isUserListView()"
                                         @click="setItem(part.itemId)">
                                     {{part.buttonText}}
                                 </button>
                             </td>
-                            <td>
-                                <p v-if="isShowQuantityValue()">
+                            <td class="three-column-table-right-column">
+                                <div v-if="isShowQuantityValue()" class="parts-right-column-text">
                                     {{part.quantity}}
-                                </p>
-                                <p v-if="!isEditMode && isMotorcycleCatalogueView()">
+                                </div>
+                                <div v-if="!isEditMode && isMotorcycleCatalogueView()" class="parts-right-column-text">
                                     {{part.comment}}
-                                </p>
-                                <input class="parts-right-column"
-                                       v-if="isEditMode && isOrdinaryItemView()"
+                                </div>
+                                <input v-if="isEditMode && isOrdinaryItemView()"
                                        v-model="part.quantity" type="text"/>
                             </td>
-                            <td v-if="isEditMode && part.comment !== 'Admin'">
+                            <td class="three-column-table-button-column" v-if="isEditMode && part.comment !== 'Admin'">
                                 <button v-model="newItemView"
                                         v-if="isItemDeleteButtonVisibleToCurrentUser(part)"
                                         type="button"
@@ -327,12 +325,11 @@
                             </td>
                         </tr>
                         <tr v-if="isEditMode" style="text-align: left">
-                            <td>
-                                <input class="parts-left-column" v-model="newPart.location" type="text"/>
+                            <td class="three-column-table-left-column">
+                                <input v-model="newPart.location" type="text"/>
                             </td>
-                            <td>
-                                <select class="parts-middle-column"
-                                        v-model="newPart"
+                            <td class="three-column-table-middle-column">
+                                <select v-model="newPart"
                                         @change="partSelectOnChange()">
                                     <option v-for="part in itemView.possibleParts"
                                             v-if="selectOptionVisible(part)"
@@ -341,10 +338,10 @@
                                     </option>
                                 </select>
                             </td>
-                            <td>
-                                <input style="width: 100%" v-model="newPart.quantity" type="text"/>
+                            <td class="three-column-table-right-column">
+                                <input type="text" v-model="newPart.quantity"/>
                             </td>
-                            <td>
+                            <td class="three-column-table-button-column">
                                 <button type="button"
                                         class="round-button"
                                         @click="addPart()">
@@ -373,21 +370,19 @@
             <tr v-if="notStub(itemView.replacersTable.name) && statusActive(replacer)"
                 style="text-align: left"
                 v-for="replacer in itemView.replacersTable.replacers">
-                <td class="wide">
+                <td class="three-column-table-left-column">
                     <p v-if="!isEditMode">{{replacer.comment}}</p>
-                    <input class="wide"
-                           v-if="isEditMode"
+                    <input v-if="isEditMode"
                            v-model="replacer.comment"
                            type="text"/>
                 </td>
-                <td style="text-align: center">
+                <td class="three-column-table-middle-column">
                     <button type="button"
-                            class="wide"
                             @click="setItem(replacer.itemId)">
                         {{replacer.buttonText}}
                     </button>
                 </td>
-                <td style="width: 30px; text-align: center">{{replacer.rating}}</td>
+                <td class="three-column-table-right-column">{{replacer.rating}}</td>
                 <td>
                     <button v-if="!isEditMode && !isRated(replacer)" v-model="newItemView"
                             type="button"
@@ -396,7 +391,7 @@
                         {{"&#x2191;"}}
                     </button>
                 </td>
-                <td style="text-align: right">
+                <td>
                     <button v-if="!isEditMode && !isRated(replacer)" v-model="newItemView"
                             type="button"
                             class="round-button"
@@ -418,18 +413,17 @@
                     </button>
                 </td>
             </tr>
-            <tr style="text-align: center; color: red">
+            <tr style="color: red">
                 <td colspan="5">
                     {{newReplacerMessage}}
                 </td>
             </tr>
-            <tr v-if="notStub(itemView.replacersTable.name) && isEditMode" style="text-align: left">
-                <td class="wide">
-                    <input class="wide" v-model="newReplacer.comment" type="text"/>
+            <tr v-if="notStub(itemView.replacersTable.name) && isEditMode">
+                <td>
+                    <input v-model="newReplacer.comment" type="text"/>
                 </td>
-                <td style="text-align: center">
-                    <select class="wide"
-                            v-model="newReplacer"
+                <td>
+                    <select v-model="newReplacer"
                             @change="replacerSelectOnChange()">
                         <option v-for="replacer in itemView.replacers"
                                 v-if="selectOptionVisible(replacer)"
@@ -438,7 +432,9 @@
                         </option>
                     </select>
                 </td>
-                <td style="text-align: right" colspan="3">
+                <td></td>
+                <td></td>
+                <td>
                     <button type="button"
                             class="round-button"
                             @click="addReplacer()">
@@ -447,6 +443,41 @@
                 </td>
             </tr>
             <tr><td colspan="5"><hr></td></tr>
+            </tbody>
+        </table>
+
+        <table id="additional-menu" v-if="isHome()">
+            <tbody>
+            <tr><td colspan="3">{{"Additional menu"}}</td></tr>
+            <tr>
+                <td class="three-column-table-left-column"></td>
+                <td class="three-column-table-middle-column">
+                    <button type="button"
+                            v-on:click="openItemsManagement()">
+                        {{"Items management"}}
+                    </button>
+                </td>
+                <td class="three-column-table-right-column"></td>
+                <td class="three-column-table-button-column"></td>
+            </tr>
+            <tr v-if="isAdmin()">
+                <td></td>
+                <td>
+                    <button type="button"
+                            v-on:click="openUsersList()">
+                        {{"Users"}}
+                    </button>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <div style="text-align: center; margin-top: 60px; margin-bottom: 20px">
+                        {{"Minsk 2019"}}
+                    </div>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -515,11 +546,40 @@
                 authorization: state => state.dictionary.authorization,
                 userName: state => state.dictionary.userName,
                 itemView: state => state.dictionary.itemView,
-                itemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
+                itemIds: state => state.dictionary.itemIds,
+                lastItemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
             })
         },
 
         methods: {
+            isHome() {
+                return this.itemIds.length === 1;
+            },
+
+            isAdmin() {
+                return this.itemView.userData.comment === 'Admin'
+            },
+
+            openItemsManagement() {
+                let itemsManagementId = -1;
+                this.setItem(itemsManagementId);
+
+            },
+
+            openUsersList() {
+                let usersListId = -4;
+                this.setItem(usersListId);
+            },
+
+            setItem(id) {
+                console.log("11111111");
+                this.$store.dispatch("setLoadingState", true);
+                this.$store.dispatch("addItemId", id);
+                this.switchEditModeOff();
+                this.$emit('select-item', id);
+                // window.location.reload();
+
+            },
 
             searchInGoogle() {
                 let q = "buy " + this.itemView.header.name;
@@ -711,10 +771,6 @@
                 this.categoryMessage = "";
             },
 
-            stubMethod() {
-
-            },
-
             isShowInfoButton(message) {
                 return message === 'show button' && !this.isEditMode && this.isOrdinaryItemView();
             },
@@ -728,7 +784,7 @@
                 } else if (this.sameItemNameExistsInCategory(this.newItemCategory, this.newItemName)) {
                     this.newItemNameMessage = "Item with this name already exists"
                 } else {
-                    //this.$store.dispatch("setLoading", true);
+                    this.$store.dispatch("setLoadingState", true);
                     this.clearItemCreationMessages();
                     axios
                         .post("/backend/item/create-view/"
@@ -741,16 +797,26 @@
                         })
                         .then(response => {
                             let newItemView = response.data;
-                            this.setItem(newItemView.itemId);
+                            this.$store.dispatch("addItemId", newItemView.itemId);
+                            this.$store.dispatch("setItemView", newItemView);
+                            this.$store.dispatch("setLoadingState", false);
                         });
                 }
             },
 
-            setItem(id) {
-                this.$store.dispatch("setLoading", true);
-                this.$store.dispatch("addItemId", id);
-                this.$emit('select-item', id);
-                this.switchEditModeOff();
+            update(id) {
+                this.$store.dispatch("setLoadingState", true);
+                axios
+                    .put("/backend/item/update-view/" + id + "/" + this.userName, this.newItemView, {
+                        headers: {
+                            Authorization: this.authorization
+                        }
+                    })
+                    .then(response => {
+                        let newItemView = response.data;
+                        this.$store.dispatch("setItemView", newItemView);
+                        this.$store.dispatch("setLoadingState", false);
+                    });
             },
 
             openWishList() {
@@ -764,7 +830,7 @@
             },
 
             cancel() {
-                let id = this.itemId;
+                let id = this.lastItemId;
                 this.$emit('cancel', id);
                 this.switchEditModeOff();
             },
@@ -835,24 +901,6 @@
 
             save() {
                 this.update(this.newItemView.itemId);
-            },
-
-            update(id) {
-                axios
-                    .put("/backend/item/update-view/" + id + "/" + this.userName, this.newItemView, {
-                        headers: {
-                            Authorization: this.authorization
-                        }
-                    })
-                    .then(() => {
-                        this.back();
-                        this.setItem(id);
-                    });
-            },
-
-            back() {
-                this.$store.dispatch("removeLastItemView");
-                this.$store.dispatch("removeLastItemId");
             },
 
             isPartsTitleVisible() {
@@ -970,54 +1018,35 @@
     }
 </script>
 
-<style>
-    #parts-table {
-
+<style scoped>
+    #header-menu, #item-creation-menu, #item-image {
+        border-spacing: 0;
     }
 
-    .parts-left-column {
-        width: 120px;
+    .two-columns-table-left-column {
+        width: 50%;
     }
 
-    .parts-middle-column {
-        width: 146px;
+    .two-column-table-right-column, .three-column-table-right-column, #get-all-table {
+        width: 100%;
     }
 
-    .parts-right-column {
-        width: 80px;
+    .three-column-table-left-column, .three-column-table-middle-column {
+        width: 33.33%;
     }
 
-    .wide {
-        width: 160px;
+    .three-column-table-left-column, .three-column-table-left-column-text {
+        text-align: left;
     }
 
-    .super-wide {
-        width: 194px;
+    .three-column-table-right-column {
+        text-align: center;
     }
 
-    @media only screen and (max-width: 1280px) {
-        input {
-            width: 100%;
-        }
+    .three-column-table-button-column {
+    }
 
-        .wide {
-            width: 100%;
-        }
-
-        .super-wide {
-            width: 100%;
-        }
-
-        .parts-left-column {
-            /*width: 33.33%;*/
-        }
-
-        .parts-middle-column {
-            /*width: 42%;*/
-        }
-
-        .parts-right-column {
-            /*width: 23%;*/
-        }
+    .round-delete-button {
+        background: red;
     }
 </style>

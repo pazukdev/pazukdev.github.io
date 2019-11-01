@@ -1,6 +1,6 @@
 <template>
-    <div class="login">
-        <table class="creation-form">
+    <div id="login">
+        <table>
             <tbody>
             <tr>
                 <td id="login-or-signup-txt">
@@ -14,7 +14,7 @@
                 <td>
                     Login
                 </td>
-                <td class="right">
+                <td class="half-width">
                     <input type="text" name="username" v-model="username"/>
                 </td>
             </tr>
@@ -96,14 +96,16 @@
                 this.setIncorrectCredentials(true);
                 let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
                 axios
-                    .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
+                    .post('/backend/login', credentialsUrl)
                     .then(response => {
                         if (response.status === 200) {
+                            this.$store.dispatch("setLoadingState", true);
                             this.setIncorrectCredentials(false);
-                            //console.log(JSON.stringify(response.data.Authorization));
                             let authorization = response.data.Authorization;
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", this.username);
+                            let specialMotorcycleCatalogueItemId = -2;
+                            this.$store.dispatch("addItemId", specialMotorcycleCatalogueItemId);
                             this.$router.push({ path: '/'});
                         }
                     });
@@ -116,7 +118,7 @@
                     repeatedPassword: this.repeatedPassword
                 };
                 axios
-                    .post("https://bearings-info.herokuapp.com/user/create", newUser)
+                    .post("/backend/user/create", newUser)
                     .then(response =>  this.loginIfValid(response.data));
             },
 
@@ -153,8 +155,10 @@
 </script>
 
 <style scoped>
+
     table {
-        margin-top: 120px;
+        padding-top: 50%;
+        text-align: left;
     }
 
     button {
