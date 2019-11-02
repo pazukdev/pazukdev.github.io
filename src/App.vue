@@ -31,13 +31,13 @@
                 </table>
             </div>
             <div style="text-align: left">
+<!--                {{"basicUrl: " + basicUrl}}<br>-->
 <!--                {{authorization}}<br>-->
 <!--                {{"Item ids: " + itemIds}}<br>-->
 <!--                {{"Is loading: " + loadingState}}<br>-->
 <!--                {{"is admin: " + admin}}<br>-->
 <!--                {{"itemView: " + itemView}}<br>-->
 <!--                {{"itemId: " + lastItemId}}<br>-->
-
             </div>
             <router-view style="padding: 20px"></router-view>
         </div>
@@ -53,6 +53,7 @@
 
         computed: {
             ...mapState({
+                basicUrl: state => state.dictionary.basicUrl,
                 authorization: state => state.dictionary.authorization,
                 loadingState: state => state.dictionary.loadingState,
                 itemIds: state => state.dictionary.itemIds,
@@ -66,17 +67,13 @@
 
         methods: {
             logout() {
-                window.localStorage.clear();
                 this.$store.dispatch("setDefaultState");
                 this.$router.push('/login');
+                console.log("logout");
             },
 
             isAuthorized() {
                 return this.authorization !== "";
-            },
-
-            reload() {
-                window.location.reload();
             },
 
             isBackButtonDisplayed() {
@@ -84,29 +81,34 @@
             },
 
             back() {
-                this.$store.dispatch("setLoadingState", true);
                 this.$store.dispatch("removeLastItemId");
                 this.getItemView(this.lastItemId);
             },
 
             getItemView(itemId) {
-                console.log("000000000");
+                this.$store.dispatch("setLoadingState", true);
                 axios
-                    .get("https://bearings-info.herokuapp.com/item/get-view/" + itemId
-                        + "/" + this.userName, {
+                    .get(this.basicUrl + "/item/get-view/" + itemId + "/" + this.userName, {
                         headers: {
                             Authorization: this.authorization
                         }
                     })
                     .then(response => {
-                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        this.$store.dispatch("setItemView", response.data);
-                        this.$store.dispatch("setLoadingState", false);
-                    })
-                    .catch(error => {
-                        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        this.$store.dispatch("setLoadingState", false);
+                        let previousItemView = response.data;
+                        this.dispatchView(previousItemView);
+                        this.logEvent("back button taped: item view displayed: item", previousItemView);
                     });
+            },
+
+            dispatchView(itemView) {
+                this.$store.dispatch("setItemView", itemView);
+                this.$store.dispatch("setLoadingState", false);
+            },
+
+            logEvent(event, itemView) {
+                console.log(event + ": "
+                    + "id=" + itemView.itemId
+                    + "; name=" + itemView.header.name);
             }
         }
     }

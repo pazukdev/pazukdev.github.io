@@ -37,12 +37,12 @@
             <tr>
                 <td></td>
                 <td>
-                    <button v-on:click="performLoginPageAction">{{buttonName()}}</button>
+                    <button v-on:click="performLoginPageAction()">{{buttonName()}}</button>
                 </td>
             </tr>
             <tr v-if="incorrectCredentials" class="warning-message">
                 <td colspan="2">
-                    Incorrect login or password !
+                    {{getIncorrectLoginOrPasswordMessage()}}
                 </td>
             </tr>
             <tr v-for="message in validationMessages" v-bind:value="message" class="warning-message">
@@ -70,13 +70,29 @@
             };
         },
 
+        created() {
+            this.setBasicUrl();
+        },
+
         computed: {
             ...mapState({
+                basicUrl: state => state.dictionary.basicUrl,
                 incorrectCredentials: state => state.dictionary.incorrectCredentials
             })
         },
 
         methods: {
+            setBasicUrl() {
+                let hostname = window.location.hostname;
+                let basicUrl;
+                if (hostname === "localhost") {
+                    basicUrl = "backend";
+                } else {
+                    basicUrl = "https://bearings-info.herokuapp.com";
+                }
+                this.$store.dispatch("setBasicUrl", basicUrl);
+            },
+
             performLoginPageAction() {
                 if (this.isLogin) {
                     this.login();
@@ -85,18 +101,18 @@
                 }
             },
 
-            loginIfValid(validationMessage) {
-                this.validationMessages = validationMessage;
+            loginIfValid(validationMessages, newUserName) {
+                this.validationMessages = validationMessages;
                 if (this.validationMessages.length === 0) {
+                    console.log("a new user created: " + newUserName);
                     this.login();
                 }
             },
 
             login() {
-                this.setIncorrectCredentials(true);
                 let credentialsUrl ="username=" + this.username + "&" + "password=" + this.password;
                 axios
-                    .post('https://bearings-info.herokuapp.com/login', credentialsUrl)
+                    .post(this.basicUrl + "/login", credentialsUrl)
                     .then(response => {
                         if (response.status === 200) {
                             this.$store.dispatch("setLoadingState", true);
@@ -107,7 +123,12 @@
                             let specialMotorcycleCatalogueItemId = -2;
                             this.$store.dispatch("addItemId", specialMotorcycleCatalogueItemId);
                             this.$router.push({ path: '/'});
+                            console.log("logged in as " + this.username)
                         }
+                    })
+                    .catch(error =>{
+                        this.setIncorrectCredentials(true);
+                        console.log("login failed: " + this.getIncorrectLoginOrPasswordMessage());
                     });
             },
 
@@ -118,8 +139,8 @@
                     repeatedPassword: this.repeatedPassword
                 };
                 axios
-                    .post("https://bearings-info.herokuapp.com/user/create", newUser)
-                    .then(response =>  this.loginIfValid(response.data));
+                    .post(this.basicUrl + "/user/create", newUser)
+                    .then(response => {this.loginIfValid(response.data, newUser.name)});
             },
 
             switchForm() {
@@ -149,13 +170,16 @@
 
             setIncorrectCredentials(incorrectCredentials) {
                 this.$store.dispatch("setIncorrectCredentials", incorrectCredentials);
+            },
+
+            getIncorrectLoginOrPasswordMessage() {
+                return "Incorrect login or password !";
             }
         }
     }
 </script>
 
 <style scoped>
-
     table {
         padding-top: 50%;
         text-align: left;
