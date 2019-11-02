@@ -564,7 +564,7 @@
 
         methods: {
             refresh() {
-                //this.redirectToLogin();
+                this.redirectToLogin();
                 this.getItemView(this.lastItemId);
             },
 
