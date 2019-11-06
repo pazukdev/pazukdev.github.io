@@ -98,8 +98,8 @@
             },
 
             logout() {
+                this.$router.push('/').catch(err => {});
                 this.$store.dispatch("setDefaultState");
-                this.$router.push('/');
                 console.log("logout");
                 this.loginAsGuest();
             },
