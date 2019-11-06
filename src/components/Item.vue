@@ -5,6 +5,7 @@
         </div>
         <div v-if="!isLoading()">
                     <div style="text-align: left">
+<!--                        {{"!!!"}}-->
 <!--                        {{"itemView.imgData: " + itemView.imgData}}<br>-->
 <!--                        {{"imgData: " + imgData}}<br>-->
 <!--                        {{"newItemView.imageData: " + this.newItemView.imgData}}<br>-->
