@@ -4,36 +4,38 @@
             {{"Loading..."}}
         </div>
         <div v-if="!isLoading()">
-            <!--        <div style="text-align: left">-->
-            <!--            {{newItemCategory}}<br>-->
-            <!--            {{newItemName}}<br>-->
-            <!--        </div>-->
+                    <div style="text-align: left">
+<!--                        {{"itemView.imgData: " + itemView.imgData}}<br>-->
+<!--                        {{"imgData: " + imgData}}<br>-->
+<!--                        {{"newItemView.imageData: " + this.newItemView.imgData}}<br>-->
+                    </div>
             <table id="header-menu">
                 <tbody>
                 <tr>
                     <td class="third-part-wide">
                         <button type="button"
-                                v-if="!isWishListView()"
+                                v-if="!isWishListView() && !isGuest()"
                                 v-on:click="openWishList()">
                             {{"Wishlist: " + itemView.wishListIds.length + " items"}}
                         </button>
                     </td>
                     <td></td>
                     <td class="third-part-wide" style="text-align: right">
-                        <div>{{itemView.userData.itemName}}</div>
-                        <div>{{"Rating: " + itemView.userData.rating}}</div>
+                        <div v-if="!isGuest()">{{itemView.userData.itemName}}</div>
+                        <div v-if="!isGuest()">{{"Rating: " + itemView.userData.rating}}</div>
                         <div v-if="isAdmin()">{{"You are admin"}}</div>
+                        <div v-if="isGuest()">{{"You are guest"}}</div>
                     </td>
                 </tr>
                 <tr><td colspan="3"><hr></td></tr>
                 <tr>
                     <td>
-                        <button v-if="!isInWishList(itemView.itemId) && isOrdinaryItemView() && !isEditMode"
+                        <button v-if="isAddToWishlistButtonVisible()"
                                 type="button"
                                 @click="addThisItemToWishList()">
                             {{"Add to Wish List"}}
                         </button>
-                        <p v-if="isInWishList(itemView.itemId) && isOrdinaryItemView()">
+                        <p v-if="isInWishList(itemView.itemId) && isOrdinaryItemView() && !isGuest()">
                             {{"Item in Wish List"}}
                         </p>
                     </td>
@@ -186,7 +188,7 @@
                             {{"Cancel"}}
                         </button>
                     </td>
-                    <td v-if="!isMotorcycleCatalogueView()" style="text-align: right">
+                    <td v-if="isEditButtonVisible()" style="text-align: right">
                         <button v-if="!isEditMode"
                                 type="button"
                                 @click="edit()">
@@ -209,24 +211,33 @@
             <table id="item-image"
                    v-if="isViewWithImage()">
                 <tbody>
-                <tr v-if="imageData.length === 0">
-                    <td>
-                        <img :src="require(`../assets//${itemView.image}`)"
-                             :alt="itemView.header.name">
-                    </td>
-                </tr>
-                <tr v-if="imageData.length > 0">
+                <tr v-if="itemView.imgData !== '-'">
                     <td>
                         <div class="image-preview">
-                            <img class="preview" :src="imageData">
+                            <img class="preview" :src="itemView.imgData" @change="previewImage">
                         </div>
                     </td>
                 </tr>
-                <tr v-if="isEditMode"><td>Upload another image</td></tr>
                 <tr v-if="isEditMode">
                     <td>
-                        <input type="file" @change="previewImage"><br><br>
-                        <button @click="onUpload">Upload!</button>
+                        <br>
+                        Upload another image<br>
+                        Accepts .png images only<br>
+                        Size limit: 2MB<br>
+                        <br>
+                    </td>
+                </tr>
+                <tr v-if="isEditMode" class="alert-message">
+                    <td>
+                        {{fileUploadMessage}}
+                    </td>
+                </tr>
+                <tr v-if="isEditMode">
+                    <td>
+                        <input type="file" accept="image/png"
+                               style="color: black"
+                               @change="previewImage"><br><br>
+<!--                        <button @click="onUpload">Upload!</button>-->
                     </td>
                 </tr>
                 <tr><td><hr></td></tr>
@@ -388,7 +399,7 @@
                     </td>
                     <td class="three-column-table-right-column">{{replacer.rating}}</td>
                     <td>
-                        <button v-if="!isEditMode && !isRated(replacer)" v-model="newItemView"
+                        <button v-if="isRateButtonVisible(replacer)" v-model="newItemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('up', replacer.itemId)">
@@ -396,13 +407,13 @@
                         </button>
                     </td>
                     <td>
-                        <button v-if="!isEditMode && !isRated(replacer)" v-model="newItemView"
+                        <button v-if="isRateButtonVisible(replacer)" v-model="newItemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('down', replacer.itemId)">
                             {{" &#x2193;"}}
                         </button>
-                        <button v-if="!isEditMode && isRated(replacer)" v-model="newItemView"
+                        <button v-if="isUnrateButtonVisible(replacer)" v-model="newItemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('cancel', replacer.itemId)">
@@ -450,7 +461,7 @@
                 </tbody>
             </table>
 
-            <table id="additional-menu" v-if="isHome()">
+            <table id="additional-menu" v-if="isAdditionalMenuDisplayed()">
                 <tbody>
                 <tr><td colspan="3">{{"Additional menu"}}</td></tr>
                 <tr>
@@ -497,8 +508,8 @@
         data() {
             return {
                 text: "",
-                file: null,
-                imageData: "",
+                // file: "",
+                imgData: "",
                 isEditMode: false,
                 newItemView: "",
                 newItemCategory: "",
@@ -508,6 +519,7 @@
                 newReplacerMessage: "",
                 categoryMessage: "",
                 newItemNameMessage: "",
+                fileUploadMessage: "",
                 actionType: "",
                 newHeaderRow: {
                     parameter: "",
@@ -559,13 +571,45 @@
         },
 
         created() {
-            this.refresh();
+            this.setBasicUrl();
+            if (!this.isAuthorized()) {
+                this.loginAsGuest();
+            } else {
+                this.getItemView(this.lastItemId);
+            }
         },
 
         methods: {
-            refresh() {
-                this.redirectToLogin();
-                this.getItemView(this.lastItemId);
+            setBasicUrl() {
+                let hostname = window.location.hostname;
+                let basicUrl;
+                if (hostname === "localhost") {
+                    basicUrl = "backend";
+                } else {
+                    basicUrl = "https://bearings-info.herokuapp.com";
+                }
+                this.$store.dispatch("setBasicUrl", basicUrl);
+            },
+
+            loginAsGuest() {
+                let username = "guest";
+                let password = "user";
+                let credentialsUrl ="username=" + username + "&" + "password=" + password;
+                axios
+                    .post(this.basicUrl + "/login", credentialsUrl)
+                    .then(response => {
+                        if (response.status === 200) {
+                            this.$store.dispatch("setLoadingState", true);
+                            let authorization = response.data.Authorization;
+                            this.$store.dispatch("setAuthorization", authorization);
+                            this.$store.dispatch("setUserName", username);
+                            console.log("logged in as " + username);
+                            this.getItemView(this.lastItemId);
+                        }
+                    })
+                    .catch(error => {
+                        console.log("login as " + username + " failed");
+                    });
             },
 
             getItemView(itemId) {
@@ -629,14 +673,26 @@
             },
 
             onUpload() {
-                let data = new FormData();
-                data.append("file", this.file);
-                axios
-                    .put(this.basicUrl + "/item/file-upload/" + this.itemView.itemId, data, {
-                        headers: {
-                            Authorization: this.authorization
-                        }
-                    })
+                // let data = new FormData();
+                // data.append("file", this.file);
+                // axios
+                //     .put(this.basicUrl + "/item/file-upload/" + this.itemView.itemId, data, {
+                //         headers: {
+                //             'Content-Type' : 'image/png',
+                //             Authorization: this.authorization
+                //         }
+                //     });
+
+                // axios
+                //     .post(this.basicUrl + "/item/file-upload/"
+                //         + this.itemView.itemId
+                //         + this.imageData.toString(), {
+                //         headers: {
+                //             Authorization: this.authorization
+                //         }
+                //     });
+
+                // this.newItemView.newImageUrl = this.imageData.toString();
             },
 
             dispatchView(itemView) {
@@ -669,12 +725,20 @@
                 return this.authorization !== "";
             },
 
+            isAdditionalMenuDisplayed() {
+                return this.isHome() && !this.isGuest();
+            },
+
             isHome() {
                 return this.itemIds.length === 1;
             },
 
             isAdmin() {
-                return this.itemView.userData.comment === 'Admin'
+                return this.itemView.userData.comment === "Admin";
+            },
+
+            isGuest() {
+                return this.itemView.userData.comment === "Guest" && this.userName === "guest";
             },
 
             openWishList() {
@@ -700,13 +764,18 @@
 
             previewImage(event) {
                 let input = event.target;
-                this.file = input.files[0];
-                if (this.file !== null) {
+                let file = input.files[0];
+                if (file !== null) {
+                    if (file.size > 2097152) {
+                        this.fileUploadMessage = "Image is too big! Size limit is 2MB";
+                        return;
+                    }
+                    this.fileUploadMessage = "";
                     let reader = new FileReader();
                     reader.onload = (e) => {
-                        this.imageData = e.target.result;
+                        this.itemView.imgData = e.target.result;
                     };
-                    reader.readAsDataURL(this.file);
+                    reader.readAsDataURL(file);
                 }
             },
 
@@ -716,6 +785,13 @@
                     && this.itemView.partsTable.header[2] === "-")
                     && this.itemView.category !== "Motorcycle"
                     && this.isPartsTitleVisible();
+            },
+
+            isAddToWishlistButtonVisible() {
+                return !this.isInWishList(this.itemView.itemId)
+                    && this.isOrdinaryItemView()
+                    && !this.isEditMode
+                    && !this.isGuest();
             },
 
             addThisItemToWishList() {
@@ -818,6 +894,14 @@
                 return false;
             },
 
+            isRateButtonVisible(replacer) {
+                return !this.isEditMode && !this.isRated(replacer) && !this.isGuest();
+            },
+
+            isUnrateButtonVisible(replacer) {
+                return !this.isEditMode && this.isRated(replacer) && !this.isGuest();
+            },
+
             isRated(replacer) {
                 return this.isInArray(replacer.itemId, this.itemView.ratedItems);
             },
@@ -883,7 +967,6 @@
 
             cancel() {
                 this.getItemView(this.lastItemId);
-                //this.switchEditModeOff();
             },
 
             switchEditModeOff() {
@@ -897,13 +980,14 @@
                 this.clearNewReplacer();
                 this.clearAllMessages();
                 this.clearNewItemData();
-                this.imageData = "";
+                this.imgData = "";
             },
 
             clearAllMessages() {
                 this.newHeaderRowMessage = "";
                 this.newPartMessage = "";
                 this.newReplacerMessage = "";
+                this.fileUploadMessage = "";
                 this.clearItemCreationMessages();
             },
 
@@ -1017,6 +1101,10 @@
                 return this.itemView.itemId === -1;
             },
 
+            isEditButtonVisible() {
+                return !this.isMotorcycleCatalogueView() && !this.isGuest();
+            },
+
             isMotorcycleCatalogueView() {
                 return this.itemView.itemId === -2;
             },
@@ -1063,7 +1151,8 @@
             },
 
             isViewWithImage() {
-                return this.itemView.image !== null;
+                // return this.itemView.image !== null;
+                return true;
             }
         }
     }
