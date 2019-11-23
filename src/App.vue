@@ -1,50 +1,24 @@
 <template id="app">
     <div id="main-div">
         <div id="screen">
-            <div id="app_bar">
-                <table>
-                    <tbody>
-                    <tr>
-                        <td style="width: 80px">
-                            <button
-                                    v-show="isBackButtonDisplayed()"
-                                    @click="back()"
-                                    id="back"
-                                    class="app-bar-button">
-                                <b>Back</b>
-                            </button>
-                        </td>
-                        <td id="appName" style="text-align: center; font-size: x-large">
-                            <b>Bearings info</b>
-                        </td>
-                        <td style="width: 80px">
-                            <button
-                                    v-show="!isGuest() && isAuthorized()"
-                                    @click="logout()"
-                                    id="logout"
-                                    class="app-bar-button">
-                                <b>Logout</b>
-                            </button>
-                            <button
-                                    v-show="isGuest()"
-                                    @click="openLoginForm()"
-                                    id="login"
-                                    class="app-bar-button">
-                                <b>Login</b>
-                            </button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+            <AppBar :back-button-displayed="isBackButtonDisplayed()"
+                    :login-button-displayed="isLoginButtonDisplayed()"
+                    :logout-button-displayed="isLogoutButtonDisplayed()"
+                    :language-select-displayed="isLanguageSelectDisplayed()"
+                    :language="appLanguage"
+                    @logout="logout"
+                    @select-language="selectLanguage"
+                    @open-login-form="openLoginForm"></AppBar>
             <div style="text-align: left">
+<!--                {{"store: " + appLanguage}}<br>-->
+<!--                {{"i18n: " + $i18n.locale}}<br>-->
+<!--                {{this.$route.params.item_id}}<br>-->
+<!--                {{this.$route.params.lang}}<br>-->
 <!--                {{"basicUrl: " + basicUrl}}<br>-->
 <!--                {{"userName: " + userName}}<br>-->
 <!--                {{"authorization: " + authorization}}<br>-->
-<!--                {{"Item ids: " + itemIds}}<br>-->
 <!--                {{"Is loading: " + loadingState}}<br>-->
 <!--                {{"itemView: " + itemView}}<br>-->
-<!--                {{"itemId: " + lastItemId}}<br>-->
             </div>
             <router-view style="padding: 20px"></router-view>
         </div>
@@ -54,26 +28,64 @@
 <script>
     import axios from 'axios';
     import {mapState} from 'vuex';
+    import AppBar from "./components/AppBar";
 
     export default {
         name: 'app',
+
+        components: {AppBar},
 
         computed: {
             ...mapState({
                 basicUrl: state => state.dictionary.basicUrl,
                 authorization: state => state.dictionary.authorization,
                 loadingState: state => state.dictionary.loadingState,
-                itemIds: state => state.dictionary.itemIds,
                 itemView: state => state.dictionary.itemView,
                 incorrectCredentials: state => state.dictionary.incorrectCredentials,
                 userName: state => state.dictionary.userName,
-                lastItemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
+                motorcycleCatalogueId: state => state.dictionary.motorcycleCatalogueId,
+                appLanguage: state => state.dictionary.appLanguage
             })
         },
 
+        created() {
+            this.setBasicUrl();
+            if (!this.isAuthorized()) {
+                this.loginAsGuest();
+            }
+        },
+
         methods: {
+            setBasicUrl() {
+                let hostname = window.location.hostname;
+                let basicUrl;
+                if (hostname === "localhost") {
+                    basicUrl = "backend";
+                } else {
+                    basicUrl = "https://bearings-info.herokuapp.com";
+                }
+                this.$store.dispatch("setBasicUrl", basicUrl);
+            },
+
+            selectLanguage(language) {
+                this.$store.dispatch("setAppLanguage", language);
+                this.$router.replace({ path: this.$router.currentRoute.path.replace(/\/[^\/]*$/, "/" + language) });
+            },
+
             isGuest() {
                 return this.isAuthorized() && this.userName === "guest";
+            },
+
+            pushTo(itemId) {
+                this.$router.push({ path: `/item/id/${itemId}/${this.appLanguage}` });
+            },
+
+            pushToHome() {
+                this.pushTo(this.motorcycleCatalogueId);
+            },
+
+            pushToLoginForm() {
+                this.$router.push({ path: `/login/${this.appLanguage}` });
             },
 
             loginAsGuest() {
@@ -89,7 +101,7 @@
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", username);
                             console.log("logged in as " + username);
-                            this.getItemView(this.lastItemId);
+                            this.pushToHome();
                         }
                     })
                     .catch(error => {
@@ -98,15 +110,16 @@
             },
 
             logout() {
-                this.$router.push('/').catch(err => {});
-                this.$store.dispatch("setDefaultState");
+                this.pushToLoginForm();
+                // this.$store.dispatch("setDefaultState");
                 console.log("logout");
                 this.loginAsGuest();
             },
 
             openLoginForm() {
-                this.$store.dispatch("setDefaultState");
-                this.$router.push('/login');
+                this.pushToLoginForm();
+                // this.$store.dispatch("setDefaultState");
+                console.log("logout");
                 console.log("login form opened");
             },
 
@@ -115,39 +128,29 @@
             },
 
             isBackButtonDisplayed() {
-                return this.itemIds.length > 1 && !this.loadingState;
+                return !this.isLoginPage() && !this.isHomePage() && !this.loadingState;
             },
 
-            back() {
-                console.log("back button taped");
-                this.$store.dispatch("removeLastItemId");
-                this.getItemView(this.lastItemId);
+            isLogoutButtonDisplayed() {
+                return !this.isGuest() && this.isAuthorized();
             },
 
-            getItemView(itemId) {
-                this.$store.dispatch("setLoadingState", true);
-                axios
-                    .get(this.basicUrl + "/item/get-view/" + itemId + "/" + this.userName, {
-                        headers: {
-                            Authorization: this.authorization
-                        }
-                    })
-                    .then(response => {
-                        let previousItemView = response.data;
-                        this.dispatchView(previousItemView);
-                        this.logEvent("item view displayed: item", previousItemView);
-                    });
+            isLoginButtonDisplayed() {
+                return this.isGuest() && !this.isLoginPage();
             },
 
-            dispatchView(itemView) {
-                this.$store.dispatch("setItemView", itemView);
-                this.$store.dispatch("setLoadingState", false);
+            isLanguageSelectDisplayed() {
+                // return !this.isLoginPage();
+                return true;
             },
 
-            logEvent(event, itemView) {
-                console.log(event + ": "
-                    + "id=" + itemView.itemId
-                    + "; name=" + itemView.header.name);
+            isLoginPage() {
+                return window.location.href.includes("login");
+            },
+
+            isHomePage() {
+                return this.$route.params.item_id === this.motorcycleCatalogueId.toString()
+                    || this.$route.params.item_id === "home";
             }
         }
     }
@@ -191,30 +194,12 @@
         display: none;
     }
 
-    #app_bar {
-        padding-top: 5px;
-        min-height: 56px;
-        max-height: 200px;
-        text-align: center;
-    }
-
-    #appName {
-        text-align: center;
-        color: #212121;
-    }
-
-    .app-bar-button {
-        width: 100%;
-        height: 100%;
-        background: none;
-        font-size: larger;
-        color: #212121
-    }
-
     .round-button, .round-delete-button {
         text-align: center;
         height: 32px;
         width: 32px;
+        min-height: initial;
+        max-height: initial;
         border-radius: 16px;
     }
 
@@ -249,7 +234,16 @@
     button, select, input {
         border-radius: 4px;
         border: none;
+    }
+
+    select, input {
         height: 52px;
+    }
+
+    button, label {
+        min-height: 52px;
+        max-height: 92px;
+        color: #050505;
     }
 
     table {
@@ -263,6 +257,10 @@
 
     img {
         max-width: 100%;
+    }
+
+    summary {
+        text-align: left;
     }
 
     .alert-message {

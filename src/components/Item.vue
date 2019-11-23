@@ -1,59 +1,27 @@
 <template>
     <div>
         <div v-if="isLoading()" style="text-align: center; padding-top: 50%">
-            {{"Loading..."}}
+            {{$t("loading") + "..."}}
         </div>
         <div v-if="!isLoading()">
-                    <div style="text-align: left">
-<!--                        {{"!!!"}}-->
-<!--                        {{"itemView.imgData: " + itemView.imgData}}<br>-->
-<!--                        {{"imgData: " + imgData}}<br>-->
-<!--                        {{"newItemView.imageData: " + this.newItemView.imgData}}<br>-->
-                    </div>
-            <table id="header-menu">
-                <tbody>
-                <tr>
-                    <td class="third-part-wide">
-                        <button type="button"
-                                v-if="!isWishListView() && !isGuest()"
-                                v-on:click="openWishList()">
-                            {{"Wishlist: " + itemView.wishListIds.length + " items"}}
-                        </button>
-                    </td>
-                    <td></td>
-                    <td class="third-part-wide" style="text-align: right">
-                        <div v-if="!isGuest()">{{itemView.userData.itemName}}</div>
-                        <div v-if="!isGuest()">{{"Rating: " + itemView.userData.rating}}</div>
-                        <div v-if="isAdmin()">{{"You are admin"}}</div>
-                        <div v-if="isGuest()">{{"You are guest"}}</div>
-                    </td>
-                </tr>
-                <tr><td colspan="3"><hr></td></tr>
-                <tr>
-                    <td>
-                        <button v-if="isAddToWishlistButtonVisible()"
-                                type="button"
-                                @click="addThisItemToWishList()">
-                            {{"Add to Wish List"}}
-                        </button>
-                        <p v-if="isInWishList(itemView.itemId) && isOrdinaryItemView() && !isGuest()">
-                            {{"Item in Wish List"}}
-                        </p>
-                    </td>
-                    <td></td>
-                    <td>
-                        <button v-if="itemView.searchEnabled"
-                                type="button"
-                                @click="searchInGoogle()">
-                            {{"Google search"}}
-                        </button>
-                    </td>
-                </tr>
-                <tr v-if="isOrdinaryItemView()">
-                    <td colspan="3"><hr></td>
-                </tr>
-                </tbody>
-            </table>
+            <div style="text-align: left">
+<!--                {{itemView.partsTable.tables}}<br><br>-->
+<!--                {{itemView.replacersTable}}<br><br>-->
+<!--                {{itemView.possibleParts}}<br><br>-->
+            </div>
+
+            <HeaderMenu :user-data="itemView.userData"
+                        :guest="isGuest()"
+                        :admin="isAdmin()"
+                        :wish-list-view="isWishListView()"
+                        :items-count-in-wishlist="itemView.wishListIds.length"
+                        :add-to-wishlist-button-visible="isAddToWishlistButtonVisible()"
+                        :item-in-wishlist-text-visible="isItemInWishListTextVisible()"
+                        :search-enabled="isSearchEnabled()"
+                        :show-bottom-hr="isOrdinaryItemView()"
+                        :item-name-for-search-in-google="getItemNameForSearchInGoogle()"
+                        @open-wish-list="openWishList"
+                        @add-item-to-wishlist="addThisItemToWishList"></HeaderMenu>
 
             <table id="item-creation-menu">
                 <tbody>
@@ -64,7 +32,7 @@
                 </tr>
                 <tr v-if="isOrdinaryItemView()">
                     <td colspan="3">
-                        {{"Created by " + itemView.creatorName}}
+                        {{$t("createdBy") + " " + itemView.creatorName}}
                     </td>
                 </tr>
                 <tr style="height: 10px"><td></td></tr>
@@ -76,7 +44,7 @@
                                 <td colspan="2"><hr></td>
                             </tr>
                             <tr>
-                                <td colspan="2">{{"Create new item"}}</td>
+                                <td colspan="2">{{$t("createNewItem")}}</td>
                             </tr>
                             <tr style="color: red">
                                 <td colspan="2">{{categoryMessage}}</td>
@@ -86,10 +54,10 @@
                             </tr>
                             <tr>
                                 <td class="two-columns-table-left-column">
-                                    {{"Category"}}
+                                    {{$t("category")}}
                                 </td>
                                 <td class="two-column-table-right-column">
-                                    {{"Name"}}
+                                    {{$t("name")}}
                                 </td>
                             </tr>
                             <tr>
@@ -99,7 +67,7 @@
                                            @change="categorySelectOnChange()"
                                            v-model="newItemCategory"/>
                                     <datalist id="categories">
-                                        <option v-for="category in itemView.categories"
+                                        <option v-for="category in itemView.allCategories"
                                                 v-bind:value="category">
                                             {{category}}
                                         </option>
@@ -115,7 +83,7 @@
                                 <td colspan="2">
                                     <button type="button"
                                             v-on:click="create()">
-                                        {{"Create"}}
+                                        {{$t("create")}}
                                     </button>
                                 </td>
                             </tr>
@@ -132,27 +100,27 @@
             <table id="item-description">
                 <tbody>
                 <tr style="text-align: left"
-                    v-for="row in itemView.header.matrix">
+                    v-for="row in itemView.header.rows">
                     <td class="two-columns-table-left-column">
                         <p>
-                            {{row[0]}}
+                            {{row.parameter}}
                         </p>
                     </td>
                     <td class="two-column-table-right-column">
-                        <input v-if="isEditMode && isOrdinaryItemView()" v-model="row[1]" type="text"/>
-                        <p v-if="!isShowInfoButton(row[3])
+                        <input v-if="isEditMode && isOrdinaryItemView()" v-model="row.value" type="text"/>
+                        <p v-if="!isShowInfoButton(row.message)
                     && (!isEditMode || (isEditMode && !isOrdinaryItemView()))">
-                            {{row[1]}}
+                            {{row.value}}
                         </p>
-                        <button v-if="isShowInfoButton(row[3])"
+                        <button v-if="isShowInfoButton(row.message)"
                                 type="button"
-                                @click="getItemView(row[2])">
-                            {{row[1]}}
+                                @click="navigateToItem(row.itemId)">
+                            {{row.value}}
                         </button>
                     </td>
                     <td>
-                        <button v-if="isEditMode && isOrdinaryItemView() && row[0] !== 'Name'"
-                                v-model="newItemView"
+                        <button v-if="isRemoveHeaderRowButtonVisible(row.deletable)"
+                                v-model="itemView"
                                 type="button"
                                 class="round-delete-button"
                                 @click="removeRowFromHeader(row)">
@@ -186,19 +154,19 @@
                         <button v-if="isEditMode"
                                 type="button"
                                 @click="cancel()">
-                            {{"Cancel"}}
+                            {{$t("cancel")}}
                         </button>
                     </td>
                     <td v-if="isEditButtonVisible()" style="text-align: right">
                         <button v-if="!isEditMode"
                                 type="button"
                                 @click="edit()">
-                            {{"Edit"}}
+                            {{$t("edit")}}
                         </button>
                         <button v-if="isEditMode"
                                 type="button"
                                 @click="save()">
-                            {{"Save"}}
+                            {{$t("save")}}
                         </button>
                     </td>
                     <td></td>
@@ -209,14 +177,20 @@
                 </tbody>
             </table>
 
-            <table id="item-image"
-                   v-if="isViewWithImage()">
+            <table id="item-image" v-if="isViewWithImage()">
                 <tbody>
-                <tr v-if="itemView.imgData !== '-'">
+                <tr v-if="!messagesContain('img removed')">
                     <td>
                         <div class="image-preview">
-                            <img class="preview" :src="itemView.imgData" @change="previewImage">
+                            <img class="preview" :src="itemView.imgData">
                         </div>
+                    </td>
+                </tr>
+                <tr v-if="isEditMode && itemView.defaultImg && !messagesContain('img removed')">
+                    <td>
+                        <button id="remove-img-button" type="button" @click="removeImg()">
+                            {{"Remove image"}}
+                        </button>
                     </td>
                 </tr>
                 <tr v-if="isEditMode">
@@ -248,7 +222,7 @@
                 <tbody>
                 <tr v-if="isPartsTitleVisible()">
                     <td>
-                        {{itemView.partsTable.name}}
+                        {{itemView.partsTable.localizedName}}
                     </td>
                 </tr>
                 <tr v-if="isShowPartsTableHeader()">
@@ -271,63 +245,59 @@
                         </table>
                     </td>
                 </tr>
-                <tr v-for="table in itemView.partsTable.tables">
-                    <td v-if="table.parts.length > 0" colspan="3">
-                        <table id="get-all-table">
-                            <tbody>
-                            <tr v-if="arrayHaveActiveItems(table.parts)">
-                                <td class="three-column-table-left-column">
-                                    <b>{{table.name}}</b>
-                                </td>
-                                <td class="three-column-table-middle-column"></td>
-                                <td class="three-column-table-right-column"></td>
-                                <td class="three-column-table-button-column"></td>
-                            </tr>
-                            <tr v-for="part in table.parts" v-if="statusActive(part)">
-                                <td class="three-column-table-left-column">
-                                    <p class="three-column-table-left-column-text"
-                                       v-if="!isEditMode || (isEditMode && !isOrdinaryItemView())">
-                                        {{getFirstColumnValue(part)}}
-                                    </p>
-                                    <input v-if="isEditMode && isOrdinaryItemView()"
-                                           v-model="part.location" type="text"/>
-                                </td>
-                                <td class="three-column-table-middle-column">
-                                    <p v-if="isUserListView()">
-                                        {{part.buttonText}}
-                                    </p>
-                                    <button type="button"
-                                            v-if="!isUserListView()"
-                                            @click="getItemView(part.itemId)">
-                                        {{part.buttonText}}
-                                    </button>
-                                </td>
-                                <td class="three-column-table-right-column">
-                                    <div v-if="isShowQuantityValue()" class="parts-right-column-text">
-                                        {{part.quantity}}
-                                    </div>
-                                    <div v-if="!isEditMode && isMotorcycleCatalogueView()" class="parts-right-column-text">
-                                        {{part.comment}}
-                                    </div>
-                                    <input v-if="isEditMode && isOrdinaryItemView()"
-                                           v-model="part.quantity" type="text"/>
-                                </td>
-                                <td class="three-column-table-button-column" v-if="isEditMode && part.comment !== 'Admin'">
-                                    <button v-model="newItemView"
-                                            v-if="isItemDeleteButtonVisibleToCurrentUser(part)"
-                                            type="button"
-                                            class="round-button"
-                                            style="background: red"
-                                            @click="removePartFromList(part, table.parts)">
-                                        {{"-"}}
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <p></p>
-                            </tr>
-                            </tbody>
-                        </table>
+                <tr v-for="table in itemView.partsTable.tables" v-if="arrayHaveActiveItems(table.parts)">
+                    <td colspan="3">
+                        <v-details v-model="table.opened">
+                            <summary><b>{{table.localizedName}}</b></summary>
+                            <table id="get-all-table">
+                                <tbody>
+                                <tr v-for="part in table.parts" v-if="statusActive(part)">
+                                    <td class="three-column-table-left-column">
+                                        <p class="three-column-table-left-column-text"
+                                           v-if="!isEditMode || (isEditMode && !isOrdinaryItemView())">
+                                            {{getFirstColumnValue(part)}}
+                                        </p>
+                                        <input v-if="isEditMode && isOrdinaryItemView()"
+                                               v-model="part.location" type="text"/>
+                                    </td>
+                                    <td class="three-column-table-middle-column">
+                                        <p v-if="isUserListView()">
+                                            {{part.buttonText}}
+                                        </p>
+                                        <button type="button"
+                                                v-if="!isUserListView()"
+                                                @click="navigateToItem(part.itemId)">
+                                            {{part.buttonText}}
+                                        </button>
+                                    </td>
+                                    <td class="three-column-table-right-column">
+                                        <div v-if="isShowQuantityValue()" class="parts-right-column-text">
+                                            {{part.quantity}}
+                                        </div>
+                                        <div v-if="isMotorcycleCatalogueView() || isItemsManagementView()"
+                                             class="parts-right-column-text">
+                                            {{part.localizedComment}}
+                                        </div>
+                                        <input v-if="isEditMode && isOrdinaryItemView()"
+                                               v-model="part.quantity" type="text"/>
+                                    </td>
+                                    <td class="three-column-table-button-column" v-if="isEditMode && part.comment !== 'Admin'">
+                                        <button v-model="itemView"
+                                                v-if="isItemDeleteButtonVisibleToCurrentUser(part)"
+                                                type="button"
+                                                class="round-button"
+                                                style="background: red"
+                                                @click="removePartFromList(part, table.parts)">
+                                            {{"-"}}
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <p></p>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </v-details>
                     </td>
                 </tr>
                 <tr v-if="notStub(itemView.partsTable.name) && isOrdinaryItemView()">
@@ -376,7 +346,7 @@
                 <tbody>
                 <tr>
                     <td colspan="6">
-                        {{itemView.replacersTable.name}}
+                        {{itemView.replacersTable.localizedName}}
                     </td>
                 </tr>
                 <tr>
@@ -393,13 +363,13 @@
                     </td>
                     <td class="three-column-table-middle-column">
                         <button type="button"
-                                @click="getItemView(replacer.itemId)">
+                                @click="navigateToItem(replacer.itemId)">
                             {{replacer.buttonText}}
                         </button>
                     </td>
                     <td class="three-column-table-right-column">{{replacer.rating}}</td>
                     <td>
-                        <button v-if="isRateButtonVisible(replacer)" v-model="newItemView"
+                        <button v-if="isRateButtonVisible(replacer)" v-model="itemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('up', replacer.itemId)">
@@ -407,19 +377,19 @@
                         </button>
                     </td>
                     <td>
-                        <button v-if="isRateButtonVisible(replacer)" v-model="newItemView"
+                        <button v-if="isRateButtonVisible(replacer)" v-model="itemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('down', replacer.itemId)">
                             {{" &#x2193;"}}
                         </button>
-                        <button v-if="isUnrateButtonVisible(replacer)" v-model="newItemView"
+                        <button v-if="isUnrateButtonVisible(replacer)" v-model="itemView"
                                 type="button"
                                 class="round-button"
                                 @click="rateAction('cancel', replacer.itemId)">
                             {{"x"}}
                         </button>
-                        <button v-if="isEditMode" v-model="newItemView"
+                        <button v-if="isEditMode" v-model="itemView"
                                 type="button"
                                 class="round-button"
                                 style="background: red"
@@ -461,40 +431,17 @@
                 </tbody>
             </table>
 
-            <table id="additional-menu" v-if="isAdditionalMenuDisplayed()">
-                <tbody>
-                <tr><td colspan="3">{{"Additional menu"}}</td></tr>
-                <tr>
-                    <td class="three-column-table-left-column"></td>
-                    <td class="three-column-table-middle-column">
-                        <button type="button"
-                                v-on:click="openItemsManagement()">
-                            {{"Items management"}}
-                        </button>
-                    </td>
-                    <td class="three-column-table-right-column"></td>
-                    <td class="three-column-table-button-column"></td>
-                </tr>
-                <tr v-if="isAdmin()">
-                    <td></td>
-                    <td>
-                        <button type="button"
-                                v-on:click="openUsersList()">
-                            {{"Users"}}
-                        </button>
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <div style="text-align: center; margin-top: 60px; margin-bottom: 20px">
-                            {{"Minsk 2019"}}
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <details v-if="isAdditionalMenuDisplayed()">
+                <summary id="menu-summary">{{$t("menu")}}</summary>
+                <Menu :admin="isAdmin()"
+                      :basic-url="basicUrl"
+                      @open-items-management="openItemsManagement"
+                      @open-users-list="openUsersList"></Menu>
+            </details>
+
+            <div id="place-of-creation">
+                {{"Minsk 2019"}}
+            </div>
         </div>
     </div>
 </template>
@@ -502,16 +449,21 @@
 <script>
     import axios from 'axios';
     import {mapState} from 'vuex';
+    import HeaderMenu from "./HeaderMenu";
+    import Menu from "./Menu";
 
     export default {
+
+        components: {
+            HeaderMenu,
+            Menu
+        },
 
         data() {
             return {
                 text: "",
-                // file: "",
                 imgData: "",
                 isEditMode: false,
-                newItemView: "",
                 newItemCategory: "",
                 newItemName: "",
                 newHeaderRowMessage: "",
@@ -522,18 +474,26 @@
                 fileUploadMessage: "",
                 actionType: "",
                 newHeaderRow: {
+                    id: "",
+                    name: "",
+                    localizedName: "",
+                    status: "",
                     parameter: "",
-                    value: ""
+                    value: "",
+                    itemId: "",
+                    message: ""
                 },
                 newPart: {
                     id: "",
                     name: "",
+                    localizedName: "",
                     itemId: "",
                     itemName: "",
                     itemCategory: "",
                     buttonText: "",
                     selectText: "",
                     comment: "",
+                    localizedComment: "",
                     location: "",
                     quantity: "",
                     status: "",
@@ -543,12 +503,14 @@
                 newReplacer: {
                     id: "",
                     name: "",
+                    localizedName: "",
                     itemId: "",
                     itemName: "",
                     itemCategory: "",
                     buttonText: "",
                     selectText: "",
                     comment: "",
+                    localizedComment: "",
                     location: "",
                     quantity: "",
                     status: "",
@@ -565,30 +527,77 @@
                 userName: state => state.dictionary.userName,
                 loadingState: state => state.dictionary.loadingState,
                 itemView: state => state.dictionary.itemView,
-                itemIds: state => state.dictionary.itemIds,
-                lastItemId: state => state.dictionary.itemIds[state.dictionary.itemIds.length - 1]
+                itemsManagementId: state => state.dictionary.itemsManagementId,
+                motorcycleCatalogueId: state => state.dictionary.motorcycleCatalogueId,
+                wishlistId: state => state.dictionary.wishlistId,
+                userlistId: state => state.dictionary.userlistId,
+                appLanguage: state => state.dictionary.appLanguage
             })
         },
 
+        watch: {
+            '$route': 'getItemViewByUrl'
+        },
+
         created() {
-            this.setBasicUrl();
-            if (!this.isAuthorized()) {
-                this.loginAsGuest();
-            } else {
-                this.getItemView(this.lastItemId);
-            }
+            this.getItemViewByUrl();
         },
 
         methods: {
-            setBasicUrl() {
-                let hostname = window.location.hostname;
-                let basicUrl;
-                if (hostname === "localhost") {
-                    basicUrl = "backend";
-                } else {
-                    basicUrl = "https://bearings-info.herokuapp.com";
+            getItemId() {
+                return this.$route.params.item_id;
+            },
+
+            getUserRole() {
+                return this.itemView.userData.comment;
+            },
+
+            getItemViewByUrl() {
+                if (this.$route.params.lang !== this.appLanguage) {
+                    this.$router.replace({
+                        path: this.$router.currentRoute.path.replace(/\/[^\/]*$/, "/" + this.appLanguage)
+                    });
                 }
-                this.$store.dispatch("setBasicUrl", basicUrl);
+                this.$i18n.locale = this.appLanguage;
+
+                let item_id = this.processItemId(this.$route.params.item_id);
+
+                if (item_id === "redirect to login") {
+                    console.log("/" + this.$route.params.item_id
+                        + " url is forbidden for user with role " + this.getUserRole());
+                    console.log("redirected to login");
+                    this.pushToLoginForm();
+                    return;
+                }
+
+                console.log("getItemViewByUrl(): " + item_id);
+                this.getItemView(item_id);
+            },
+
+            processItemId(itemId) {
+                if (itemId === "items_management") {
+                    return  this.itemsManagementId.toString();
+                }
+                if (itemId === "home") {
+                    return this.motorcycleCatalogueId.toString();
+                }
+                if (itemId === "wishlist") {
+                    if (!this.isAuthorized() || this.isGuest()) {
+                        return "redirect to login";
+                    }
+                    return this.wishlistId.toString();
+                }
+                if (itemId === "users") {
+                    if (!this.isAuthorized() || this.isGuest()) {
+                        return "redirect to login";
+                    }
+                    return  this.userlistId.toString();
+                }
+                return itemId;
+            },
+
+            pushToLoginForm() {
+                this.$router.push({ path: `/login/${this.appLanguage}` });
             },
 
             loginAsGuest() {
@@ -604,7 +613,6 @@
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", username);
                             console.log("logged in as " + username);
-                            this.getItemView(this.lastItemId);
                         }
                     })
                     .catch(error => {
@@ -612,11 +620,31 @@
                     });
             },
 
+            pushTo(itemId) {
+                this.$router.push({ path: `/item/id/${itemId}/${this.appLanguage}` });
+            },
+
+            pushToHome() {
+                this.pushTo(this.motorcycleCatalogueId.toString());
+            },
+
+            navigateToItem(itemId) {
+                this.pushTo(itemId);
+            },
+
+            getLanguage() {
+                return this.appLanguage;
+            },
+
             getItemView(itemId) {
                 this.$store.dispatch("setLoadingState", true);
                 this.switchEditModeOff();
                 axios
-                    .get(this.basicUrl + "/item/get-view/" + itemId + "/" + this.userName, {
+                    .get(this.basicUrl
+                        + "/" + "item/get-view"
+                        + "/" + itemId
+                        + "/" + this.userName
+                        + "/" + this.getLanguage(), {
                         headers: {
                             Authorization: this.authorization
                         }
@@ -625,7 +653,8 @@
                         let itemView = response.data;
                         this.dispatchView(itemView);
                         this.logEvent("item view displayed: item", itemView);
-                    });
+                    })
+                    .catch(err => {console.log("error on getItemView(itemId) method executing")});
             },
 
             create() {
@@ -640,16 +669,19 @@
                     this.$store.dispatch("setLoadingState", true);
                     this.clearItemCreationMessages();
                     axios
-                        .post(this.basicUrl + "/item/create-view/"
-                            + this.newItemCategory
+                        .post(this.basicUrl
+                            + "/" + "item/create-view"
+                            + "/" + this.newItemCategory
                             + "/" + this.newItemName
-                            + "/" + this.userName, {
+                            + "/" + this.userName
+                            + "/" + this.getLanguage(), {
                             headers: {
                                 Authorization: this.authorization
                             }
                         })
                         .then(response => {
                             let newItemView = response.data;
+                            this.pushTo(newItemView.itemId);
                             this.dispatchView(newItemView);
                             this.logEvent("a new item created", newItemView);
                         });
@@ -660,7 +692,12 @@
                 this.$store.dispatch("setLoadingState", true);
                 this.switchEditModeOff();
                 axios
-                    .put(this.basicUrl + "/item/update-view/" + itemId + "/" + this.userName, this.newItemView, {
+                    .put(this.basicUrl
+                        + "/" + "item/update-view"
+                        + "/" + itemId
+                        + "/" + this.userName
+                        + "/" + this.getLanguage(),
+                        this.itemView, {
                         headers: {
                             Authorization: this.authorization
                         }
@@ -673,7 +710,6 @@
             },
 
             dispatchView(itemView) {
-                this.$store.dispatch("addItemId", itemView.itemId);
                 this.$store.dispatch("setItemView", itemView);
                 this.$store.dispatch("setLoadingState", false);
             },
@@ -688,26 +724,16 @@
                 return this.loadingState === true;
             },
 
-            redirectToLogin() {
-                if (!this.isAuthorized()) {
-                    this.goToLogin();
-                }
-            },
-
-            goToLogin() {
-                this.$router.push({ path: '/login'});
-            },
-
             isAuthorized() {
                 return this.authorization !== "";
             },
 
             isAdditionalMenuDisplayed() {
-                return this.isHome() && !this.isGuest();
+                return this.isHomePage() && !this.isGuest();
             },
 
-            isHome() {
-                return this.itemIds.length === 1;
+            isHomePage() {
+                return this.isMotorcycleCatalogueView();
             },
 
             isAdmin() {
@@ -720,23 +746,25 @@
 
             openWishList() {
                 let wishListId = -3;
-                this.getItemView(wishListId);
+                // this.getItemView(wishListId);
+                this.navigateToItem(wishListId);
             },
 
             openItemsManagement() {
                 let itemsManagementId = -1;
-                this.getItemView(itemsManagementId);
+                //this.getItemView(itemsManagementId);
+                this.navigateToItem(itemsManagementId);
 
             },
 
             openUsersList() {
                 let usersListId = -4;
-                this.getItemView(usersListId);
+                // this.getItemView(usersListId);
+                this.navigateToItem(usersListId);
             },
 
-            searchInGoogle() {
-                let q = "buy " + this.itemView.header.name;
-                window.open('http://google.com/search?q=' + q);
+            getItemNameForSearchInGoogle() {
+                return this.itemView.header.name;
             },
 
             previewImage(event) {
@@ -748,12 +776,18 @@
                         return;
                     }
                     this.fileUploadMessage = "";
+                    this.removeFromArray("img removed", this.itemView.messages);
+                    this.itemView.messages.push("img uploaded");
                     let reader = new FileReader();
                     reader.onload = (e) => {
                         this.itemView.imgData = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
+            },
+
+            removeImg() {
+                this.itemView.messages.push("img removed");
             },
 
             isShowPartsTableHeader() {
@@ -771,8 +805,11 @@
                     && !this.isGuest();
             },
 
+            isItemInWishListTextVisible() {
+                return this.isInWishList(this.itemView.itemId) && this.isOrdinaryItemView() && !this.isGuest();
+            },
+
             addThisItemToWishList() {
-                this.newItemView = this.itemView;
                 this.itemView.addToWishList = true;
                 this.save();
             },
@@ -782,7 +819,6 @@
                     action: action,
                     itemId: itemId
                 };
-                this.newItemView = this.itemView;
                 this.save();
             },
 
@@ -793,8 +829,8 @@
                 } else if (this.rowAlreadyInList(this.newHeaderRow.parameter)) {
                     this.newHeaderRowMessage = "Parameter already exists"
                 } else {
-                    let row = [this.newHeaderRow.parameter, this.newHeaderRow.value];
-                    this.newItemView.header.matrix.push(row);
+                    this.newHeaderRow.status = "added";
+                    this.itemView.header.rows.push(this.newHeaderRow);
                     this.clearNewHeaderRow();
                 }
             },
@@ -822,13 +858,13 @@
                 if (this.replacerAlreadyInList(this.newReplacer.itemId)) {
                     this.newReplacerMessage = "Replacer already in list";
                 } else {
-                    this.newItemView.replacersTable.replacers.push(this.newReplacer);
+                    this.itemView.replacersTable.replacers.push(this.newReplacer);
                     this.clearNewReplacer();
                 }
             },
 
             getItemName() {
-                return this.itemView.header.matrix[0][1];
+                return this.itemView.header.rows[0].parameter;
             },
 
             newLineIsEmpty() {
@@ -836,8 +872,8 @@
             },
 
             rowAlreadyInList(parameter) {
-                for (let i=0; i < this.newItemView.header.matrix.length; i++) {
-                    if (this.newItemView.header.matrix[i][0] === parameter) {
+                for (let i=0; i < this.itemView.header.rows.length; i++) {
+                    if (this.itemView.header.rows[i].parameter === parameter) {
                         return true;
                     }
                 }
@@ -854,8 +890,8 @@
             },
 
             replacerAlreadyInList(id) {
-                for (let i=0; i < this.newItemView.replacersTable.replacers.length; i++) {
-                    if (this.newItemView.replacersTable.replacers[i].itemId === id) {
+                for (let i=0; i < this.itemView.replacersTable.replacers.length; i++) {
+                    if (this.itemView.replacersTable.replacers[i].itemId === id) {
                         return true;
                     }
                 }
@@ -883,9 +919,9 @@
                 return this.isInArray(replacer.itemId, this.itemView.ratedItems);
             },
 
-            isInArray(id, array) {
+            isInArray(element, array) {
                 for (let i=0; i < array.length; i++) {
-                    if (array[i] === id) {
+                    if (array[i] === element) {
                         return true;
                     }
                 }
@@ -893,7 +929,7 @@
             },
 
             removeRowFromHeader(row) {
-                this.removeFromArray(row, this.newItemView.header.matrix);
+                this.removeFromArray(row, this.itemView.header.rows);
             },
 
             removePartFromList(part, array) {
@@ -904,7 +940,7 @@
             },
 
             removeReplacerFromList(replacer) {
-                this.removeFromArray(replacer, this.newItemView.replacersTable.replacers);
+                this.removeFromArray(replacer, this.itemView.replacersTable.replacers);
             },
 
             removeFromArray(element, array) {
@@ -912,12 +948,12 @@
             },
 
             getTable(category) {
-                for (let i=0; i < this.newItemView.partsTable.tables.length; i++) {
-                    if (this.newItemView.partsTable.tables[i].name === category) {
-                        return this.newItemView.partsTable.tables[i];
+                for (let i=0; i < this.itemView.partsTable.tables.length; i++) {
+                    if (this.itemView.partsTable.tables[i].name === category) {
+                        return this.itemView.partsTable.tables[i];
                     }
                 }
-                return this.newItemView.partsTable;
+                return this.itemView.partsTable;
             },
 
             partSelectOnChange() {
@@ -939,11 +975,11 @@
 
             edit() {
                 this.isEditMode = true;
-                this.newItemView = this.itemView;
             },
 
             cancel() {
-                this.getItemView(this.lastItemId);
+                this.getItemViewByUrl();
+                // this.getItemView(this.lastItemId);
             },
 
             switchEditModeOff() {
@@ -980,8 +1016,13 @@
 
             clearNewHeaderRow() {
                 this.newHeaderRow = {
+                    id: "",
+                    name: "",
+                    status: "",
                     parameter: "",
-                    value: ""
+                    value: "",
+                    itemId: "",
+                    message: ""
                 };
             },
 
@@ -1012,7 +1053,7 @@
             },
 
             save() {
-                this.update(this.newItemView.itemId);
+                this.update(this.itemView.itemId);
             },
 
             isPartsTitleVisible() {
@@ -1083,7 +1124,7 @@
             },
 
             isMotorcycleCatalogueView() {
-                return this.itemView.itemId === -2;
+                return this.itemView.itemId === this.motorcycleCatalogueId;
             },
 
             isWishListView() {
@@ -1097,6 +1138,10 @@
             isShowQuantityValue() {
                 return (!this.isEditMode && (this.isOrdinaryItemView() || this.isUserListView()))
                     || (this.isEditMode && this.isUserListView());
+            },
+
+            isSearchEnabled() {
+                return this.itemView.searchEnabled;
             },
 
             notStub(name) {
@@ -1128,18 +1173,21 @@
             },
 
             isViewWithImage() {
-                // return this.itemView.image !== null;
-                return true;
+                return this.itemView.imgData !== '-';
+            },
+
+            messagesContain(message) {
+                return this.isInArray(message, this.itemView.messages);
+            },
+
+            isRemoveHeaderRowButtonVisible(deletable) {
+                return this.isEditMode && this.isOrdinaryItemView() && deletable;
             }
         }
     }
 </script>
 
-<style scoped>
-    #header-menu, #item-creation-menu, #item-image {
-        border-spacing: 0;
-    }
-
+<style>
     .two-columns-table-left-column {
         width: 50%;
     }
@@ -1165,5 +1213,26 @@
 
     .round-delete-button {
         background: red;
+    }
+
+    #item-creation-menu, #item-image {
+        border-spacing: 0;
+    }
+
+    #menu-summary {
+        text-align: center;
+        font-weight: bold;
+        font-size: large;
+    }
+
+    #place-of-creation {
+        text-align: center;
+        margin-top: 60px;
+        margin-bottom: 20px;
+    }
+
+    #remove-img-button {
+        width: initial;
+        background: red
     }
 </style>

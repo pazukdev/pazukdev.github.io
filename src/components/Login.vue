@@ -1,29 +1,34 @@
 <template>
     <div id="login">
-        <div style="text-align: right">
-            <button style="width: initial" v-on:click="loginAsGuest()">{{"Continue as guest"}}</button>
-        </div>
         <table>
             <tbody>
             <tr>
-                <td id="login-or-signup-txt">
-                    Please, {{buttonName().toLowerCase()}} or
+                <td class="half-width">
+                    <button @click="switchForm()">
+                        {{buttonReverseName()}}
+                    </button>
                 </td>
                 <td>
-                    <button v-on:click="switchForm()">{{buttonReverseName()}}</button>
+                    <button @click="loginAsGuest()">
+                        {{$t('continueAsGuest')}}
+                    </button>
                 </td>
+            </tr>
+            <tr style="height: 200px">
+                <td></td>
+                <td></td>
             </tr>
             <tr>
                 <td>
-                    Login
+                    {{"E-mail"}}
                 </td>
-                <td class="half-width">
+                <td>
                     <input type="text" name="username" v-model="username"/>
                 </td>
             </tr>
             <tr>
                 <td>
-                    Password
+                    {{$t('password')}}
                 </td>
                 <td>
                     <input type="password" name="password" v-model="password"/>
@@ -31,7 +36,7 @@
             </tr>
             <tr v-if="!isLogin">
                 <td>
-                    Repeat password
+                    {{$t("repeatPassword")}}
                 </td>
                 <td>
                     <input v-model="repeatedPassword"/>
@@ -66,7 +71,7 @@
         data() {
             return {
                 isLogin: true,
-                username: "admin",
+                username: "pazuk1985@gmail.com",
                 password: "admin",
                 repeatedPassword: "",
                 validationMessages: []
@@ -76,11 +81,25 @@
         computed: {
             ...mapState({
                 basicUrl: state => state.dictionary.basicUrl,
-                incorrectCredentials: state => state.dictionary.incorrectCredentials
+                incorrectCredentials: state => state.dictionary.incorrectCredentials,
+                motorcycleCatalogueId: state => state.dictionary.motorcycleCatalogueId,
+                appLanguage: state => state.dictionary.appLanguage
             })
         },
 
+        created() {
+            this.onUrlChange();
+        },
+
+        watch: {
+            '$route': 'onUrlChange'
+        },
+
         methods: {
+            onUrlChange() {
+                this.$i18n.locale = this.appLanguage;
+            },
+
             performLoginPageAction() {
                 if (this.isLogin) {
                     this.login();
@@ -114,7 +133,7 @@
                             let authorization = response.data.Authorization;
                             this.$store.dispatch("setAuthorization", authorization);
                             this.$store.dispatch("setUserName", this.username);
-                            this.$router.push({ path: '/'});
+                            this.pushToHome();
                             console.log("logged in as " + this.username);
                         }
                     })
@@ -122,6 +141,10 @@
                         this.setIncorrectCredentials(true);
                         console.log("login failed: " + this.getIncorrectLoginOrPasswordMessage());
                     });
+            },
+
+            pushToHome() {
+                this.$router.push({ path: `/item/id/${this.motorcycleCatalogueId}/${this.appLanguage}` });
             },
 
             signUp() {
@@ -141,11 +164,11 @@
             },
 
             buttonName() {
-                return this.isLogin ? "Log in" : "Sign up";
+                return this.isLogin ? this.$t("loginButton") : this.$t("signUp");
             },
 
             buttonReverseName() {
-                return this.isLogin ? "Sign up" : "Log in";
+                return this.isLogin ? this.$t("signUp") : this.$t("loginButton");
             },
 
             resetData() {
@@ -165,7 +188,7 @@
             },
 
             getIncorrectLoginOrPasswordMessage() {
-                return "Incorrect login or password !";
+                return this.$t("incorrectLoginOrPassword");
             }
         }
     }
@@ -173,20 +196,15 @@
 
 <style scoped>
     table {
-        padding-top: 50%;
         text-align: left;
     }
 
-    button {
+    .half-width {
         width: 50%;
     }
 
     .warning-message {
         text-align: center;
         color: red;
-    }
-
-    #login-or-signup-txt {
-        text-align: right;
     }
 </style>

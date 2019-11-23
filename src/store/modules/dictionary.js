@@ -1,11 +1,15 @@
 const state = {
     basicUrl: "backend",
+    appLanguage: "en",
     loadingState: false,
     incorrectCredentials: false,
+    itemsManagementId: -1,
+    motorcycleCatalogueId: -2,
+    wishlistId: -3,
+    userlistId: -4,
     authorization: "",
     userName: "",
-    itemView: "",
-    itemIds: [-2]
+    itemView: ""
 };
 
 const actions = {
@@ -15,6 +19,10 @@ const actions = {
 
     setBasicUrl: ({commit}, context) => {
         commit("setBasicUrl", context);
+    },
+
+    setAppLanguage: ({commit}, context) => {
+        commit("setAppLanguage", context);
     },
 
     setAuthorization: ({commit}, context) => {
@@ -35,26 +43,22 @@ const actions = {
 
     setItemView: ({commit}, context) => {
         commit("setItemView", context);
-    },
-
-    addItemId: ({commit}, context) => {
-        commit("addItemId", context);
-    },
-
-    removeLastItemId: ({commit}, context) => {
-        commit("removeLastItemId", context);
     }
 };
 
 const mutations = {
     setDefaultState(state) {
         state.basicUrl = "backend";
+        state.appLanguage = "en";
         state.loadingState = false;
         state.incorrectCredentials = false;
         state.authorization = "";
         state.userName = "";
         state.itemView = "";
-        state.itemIds = [-2];
+    },
+
+    setAppLanguage(state, appLanguage) {
+        state.appLanguage = appLanguage;
     },
 
     setBasicUrl(state, basicUrl) {
@@ -79,17 +83,6 @@ const mutations = {
 
     setItemView(state, itemView) {
         state.itemView = itemView;
-    },
-
-    addItemId(state, itemId) {
-        if (state.itemIds[state.itemIds.length - 1] !== itemId) {
-            state.itemIds.push(itemId);
-        }
-
-    },
-
-    removeLastItemId(state) {
-        state.itemIds.splice(state.itemIds.length - 1, 1);
     }
 };
 
