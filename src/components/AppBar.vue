@@ -13,12 +13,14 @@
                             @click="back()"
                             id="back"
                             class="app-bar-button">
-                        <b>{{$t('back')}}</b>
+                        {{$t('back')}}
                     </button>
                 </td>
-                <td class="app-bar-middle-side-column"></td>
+                <td class="app-bar-middle-side-column">
+                    {{"v 2.0"}}
+                </td>
                 <td id="appName">
-                    <b>Bearings info</b>
+                    {{"Soviet boxers seals & bearings"}}
                 </td>
                 <td class="app-bar-middle-side-column">
                     <select v-if="languageSelectDisplayed"
@@ -35,14 +37,14 @@
                             @click="logout()"
                             id="logout"
                             class="app-bar-button">
-                        <b>{{$t('logout')}}</b>
+                        {{$t('logout')}}
                     </button>
                     <button
                             v-show="loginButtonDisplayed"
                             @click="openLoginForm()"
                             id="login"
                             class="app-bar-button">
-                        <b>{{$t('loginButton')}}</b>
+                        {{$t('loginButton')}}
                     </button>
                 </td>
             </tr>
@@ -100,6 +102,12 @@
 </script>
 
 <style scoped>
+    table, select, .app-bar-button {
+        color: #212121;
+        font-weight: bold;
+        text-align: center;
+    }
+
     select {
         width: initial;
         height: initial;
@@ -119,20 +127,15 @@
         width: 100%;
         height: 100%;
         background: none;
-        font-size: larger;
-        color: #212121
     }
 
     #app_bar {
         padding-top: 5px;
         min-height: 56px;
         max-height: 200px;
-        text-align: center;
     }
 
-    #appName {
-        text-align: center;
-        color: #212121;
-        font-size: x-large;
+    #appName, .app-bar-button {
+        font-size: large;
     }
 </style>
