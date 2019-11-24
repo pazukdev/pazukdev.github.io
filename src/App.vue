@@ -9,17 +9,6 @@
                     @logout="logout"
                     @select-language="selectLanguage"
                     @open-login-form="openLoginForm"></AppBar>
-            <div style="text-align: left">
-<!--                {{"store: " + appLanguage}}<br>-->
-<!--                {{"i18n: " + $i18n.locale}}<br>-->
-<!--                {{this.$route.params.item_id}}<br>-->
-<!--                {{this.$route.params.lang}}<br>-->
-<!--                {{"basicUrl: " + basicUrl}}<br>-->
-<!--                {{"userName: " + userName}}<br>-->
-<!--                {{"authorization: " + authorization}}<br>-->
-<!--                {{"Is loading: " + loadingState}}<br>-->
-<!--                {{"itemView: " + itemView}}<br>-->
-            </div>
             <router-view style="padding: 20px"></router-view>
         </div>
     </div>
